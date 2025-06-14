@@ -57,15 +57,27 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    // Create approval tokens
+    // Create approval tokens with expiration date (7 days from now)
     const approveToken = crypto.randomUUID();
     const rejectToken = crypto.randomUUID();
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7); // Expire in 7 days
 
     const { error: tokenError } = await supabaseClient
       .from('approval_tokens')
       .insert([
-        { application_id: applicationId, token: approveToken, action: 'approve' },
-        { application_id: applicationId, token: rejectToken, action: 'reject' }
+        { 
+          application_id: applicationId, 
+          token: approveToken, 
+          action: 'approve',
+          expires_at: expiresAt.toISOString()
+        },
+        { 
+          application_id: applicationId, 
+          token: rejectToken, 
+          action: 'reject',
+          expires_at: expiresAt.toISOString()
+        }
       ]);
 
     if (tokenError) {
