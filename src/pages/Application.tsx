@@ -1,12 +1,17 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 import FounderDetailsStep from '../components/application/FounderDetailsStep';
 import IncubationInfoStep from '../components/application/IncubationInfoStep';
 import StartupIdeaStep from '../components/application/StartupIdeaStep';
+import ApplicationSuccess from '../components/application/ApplicationSuccess';
 
 const Application = () => {
+  const [loading, setLoading] = useState(true);
+  const [userApplication, setUserApplication] = useState(null);
   const [currentStep, setCurrentStep] = useState(1);
   const [applicationData, setApplicationData] = useState({
     // Step 1: Founder Details
@@ -36,6 +41,57 @@ const Application = () => {
     { number: 2, title: 'Incubation Info', description: 'Documents and incubation center details' },
     { number: 3, title: 'Startup Idea', description: 'Your vision and expectations' }
   ];
+
+  useEffect(() => {
+    checkUserApplication();
+  }, []);
+
+  const checkUserApplication = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
+      // Check if user has an existing application
+      const { data: applications, error } = await supabase
+        .from('applications')
+        .select('*')
+        .eq('email', user.email)
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (error) {
+        console.error('Error checking user application:', error);
+        toast({
+          title: "Error",
+          description: "Failed to check application status",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
+      if (applications && applications.length > 0) {
+        const application = applications[0];
+        setUserApplication(application);
+        
+        // If application exists and is approved, show success page
+        if (application.status === 'approved') {
+          // User will see the ApplicationSuccess component
+        } else if (application.status === 'pending' || application.status === 'rejected') {
+          // User will see the ApplicationSuccess component with current status
+        }
+      }
+      
+      setLoading(false);
+    } catch (error) {
+      console.error('Error:', error);
+      setLoading(false);
+    }
+  };
 
   const progress = (currentStep / steps.length) * 100;
 
@@ -87,6 +143,23 @@ const Application = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Checking application status...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If user has an existing application, show the success component
+  if (userApplication) {
+    return <ApplicationSuccess applicationId={userApplication.id} />;
+  }
+
+  // If no application exists, show the application form
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4 max-w-4xl">
