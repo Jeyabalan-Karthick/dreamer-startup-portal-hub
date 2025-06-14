@@ -43,7 +43,9 @@ const StartupIdeaStep = ({ data, updateData, onPrev }: StartupIdeaStepProps) => 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!data.ideaDescription.trim()) {
+    console.log('Starting application submission with data:', data);
+    
+    if (!data.ideaDescription?.trim()) {
       toast({
         title: "Error",
         description: "Please describe your startup idea",
@@ -61,67 +63,99 @@ const StartupIdeaStep = ({ data, updateData, onPrev }: StartupIdeaStepProps) => 
       return;
     }
 
+    // Validate required fields from previous steps
+    if (!data.founderName || !data.startupName || !data.email || !data.phone || !data.companyType || !data.teamSize || !data.source || !data.incubationCentre) {
+      console.error('Missing required fields:', {
+        founderName: data.founderName,
+        startupName: data.startupName,
+        email: data.email,
+        phone: data.phone,
+        companyType: data.companyType,
+        teamSize: data.teamSize,
+        source: data.source,
+        incubationCentre: data.incubationCentre
+      });
+      toast({
+        title: "Error",
+        description: "Please complete all required fields in previous steps",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setSubmitting(true);
 
     try {
-      const { data: applicationData, error } = await supabase
+      console.log('Inserting application data...');
+      
+      const applicationData = {
+        founder_name: data.founderName,
+        startup_name: data.startupName,
+        email: data.email,
+        phone: data.phone,
+        company_type: data.companyType,
+        team_size: data.teamSize,
+        source: data.source,
+        coupon_code: data.couponCode || '',
+        incubation_centre: data.incubationCentre,
+        registration_certificate_url: data.registrationCertificate || null,
+        incubation_letter_url: data.incubationLetter || null,
+        website: data.website || null,
+        idea_description: data.ideaDescription,
+        expectations: data.expectations,
+        challenges: data.challenges || '',
+        status: 'pending'
+      };
+
+      console.log('Application data to insert:', applicationData);
+
+      const { data: insertedApplication, error: insertError } = await supabase
         .from('applications')
-        .insert([{
-          founder_name: data.founderName,
-          startup_name: data.startupName,
-          email: data.email,
-          phone: data.phone,
-          company_type: data.companyType,
-          team_size: data.teamSize,
-          source: data.source,
-          coupon_code: data.couponCode,
-          incubation_centre: data.incubationCentre,
-          registration_certificate_url: data.registrationCertificate,
-          incubation_letter_url: data.incubationLetter,
-          website: data.website,
-          idea_description: data.ideaDescription,
-          expectations: data.expectations,
-          challenges: data.challenges,
-          status: 'pending'
-        }])
+        .insert([applicationData])
         .select()
         .single();
 
-      if (error) {
-        console.error('Error submitting application:', error);
+      if (insertError) {
+        console.error('Database insertion error:', insertError);
         toast({
-          title: "Error",
-          description: "Failed to submit application. Please try again.",
+          title: "Database Error",
+          description: `Failed to save application: ${insertError.message}`,
           variant: "destructive",
         });
         return;
       }
 
-      console.log('Application submitted successfully:', applicationData);
+      console.log('Application saved successfully:', insertedApplication);
       
       // Send email notification to admin
+      console.log('Sending email notification...');
       const { error: emailError } = await supabase.functions.invoke('send-approval-email', {
-        body: { applicationId: applicationData.id }
+        body: { applicationId: insertedApplication.id }
       });
 
       if (emailError) {
-        console.error('Error sending email:', emailError);
-        // Don't fail the submission if email fails
+        console.error('Email sending error:', emailError);
+        // Don't fail the submission if email fails, but notify user
+        toast({
+          title: "Application Submitted",
+          description: "Application saved successfully, but email notification failed. Admin will be notified manually.",
+        });
+      } else {
+        console.log('Email sent successfully');
+        toast({
+          title: "Success",
+          description: "Application submitted successfully! Admin has been notified.",
+        });
       }
 
-      setApplicationId(applicationData.id);
+      setApplicationId(insertedApplication.id);
       setSubmitted(true);
-      
-      toast({
-        title: "Success",
-        description: "Application submitted successfully! Admin has been notified.",
-      });
 
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Unexpected error during submission:', error);
       toast({
-        title: "Error",
-        description: "An unexpected error occurred. Please try again.",
+        title: "Submission Error",
+        description: `An unexpected error occurred: ${error instanceof Error ? error.message : 'Unknown error'}`,
         variant: "destructive",
       });
     } finally {
@@ -146,7 +180,7 @@ const StartupIdeaStep = ({ data, updateData, onPrev }: StartupIdeaStepProps) => 
             <Textarea
               id="ideaDescription"
               placeholder="Tell us about your startup idea, the problem you're solving, and your solution..."
-              value={data.ideaDescription}
+              value={data.ideaDescription || ''}
               onChange={(e) => updateData({ ideaDescription: e.target.value })}
               rows={4}
               required
@@ -176,7 +210,7 @@ const StartupIdeaStep = ({ data, updateData, onPrev }: StartupIdeaStepProps) => 
             <Textarea
               id="challenges"
               placeholder="Tell us about any challenges you're facing in your startup journey..."
-              value={data.challenges}
+              value={data.challenges || ''}
               onChange={(e) => updateData({ challenges: e.target.value })}
               rows={3}
             />
