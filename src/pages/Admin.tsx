@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -20,8 +21,13 @@ interface Application {
   incubation_centre: string;
   status: string;
   created_at: string;
+  approved_at?: string;
+  rejected_at?: string;
   website?: string;
   idea_description: string;
+  expectations: string[];
+  challenges?: string;
+  admin_notes?: string;
 }
 
 interface IncubationCentre {
@@ -35,6 +41,7 @@ const Admin = () => {
   const [incubationCentres, setIncubationCentres] = useState<IncubationCentre[]>([]);
   const [loading, setLoading] = useState(true);
   const [newCentre, setNewCentre] = useState({ name: '', admin_email: '' });
+  const [activeTab, setActiveTab] = useState('all');
 
   useEffect(() => {
     fetchApplications();
@@ -125,9 +132,16 @@ const Admin = () => {
 
   const updateApplicationStatus = async (id: string, status: string) => {
     try {
+      const timestampField = status === 'approved' ? 'approved_at' : status === 'rejected' ? 'rejected_at' : null;
+      const updateData: any = { status };
+      
+      if (timestampField) {
+        updateData[timestampField] = new Date().toISOString();
+      }
+
       const { error } = await supabase
         .from('applications')
-        .update({ status })
+        .update(updateData)
         .eq('id', id);
 
       if (error) {
@@ -164,6 +178,28 @@ const Admin = () => {
     }
   };
 
+  const getFilteredApplications = () => {
+    switch (activeTab) {
+      case 'pending':
+        return applications.filter(app => app.status === 'pending');
+      case 'approved':
+        return applications.filter(app => app.status === 'approved');
+      case 'rejected':
+        return applications.filter(app => app.status === 'rejected');
+      default:
+        return applications;
+    }
+  };
+
+  const getStatusCounts = () => {
+    return {
+      all: applications.length,
+      pending: applications.filter(app => app.status === 'pending').length,
+      approved: applications.filter(app => app.status === 'approved').length,
+      rejected: applications.filter(app => app.status === 'rejected').length,
+    };
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -174,6 +210,9 @@ const Admin = () => {
       </div>
     );
   }
+
+  const statusCounts = getStatusCounts();
+  const filteredApplications = getFilteredApplications();
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -231,75 +270,96 @@ const Admin = () => {
           </CardContent>
         </Card>
 
-        {/* Applications Table */}
+        {/* Applications with Tabs */}
         <Card>
           <CardHeader>
-            <CardTitle>Applications ({applications.length})</CardTitle>
+            <CardTitle>Applications Management</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Founder</TableHead>
-                    <TableHead>Startup</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Phone</TableHead>
-                    <TableHead>Centre</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Applied</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {applications.map((app) => (
-                    <TableRow key={app.id}>
-                      <TableCell className="font-medium">{app.founder_name}</TableCell>
-                      <TableCell>{app.startup_name}</TableCell>
-                      <TableCell>{app.email}</TableCell>
-                      <TableCell>{app.phone}</TableCell>
-                      <TableCell>{app.incubation_centre}</TableCell>
-                      <TableCell>
-                        <Badge variant={getStatusBadgeVariant(app.status)}>
-                          {app.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        {new Date(app.created_at).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          {app.status === 'pending' && (
-                            <>
-                              <Button
-                                size="sm"
-                                onClick={() => updateApplicationStatus(app.id, 'approved')}
-                                className="bg-green-600 hover:bg-green-700"
-                              >
-                                Approve
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="destructive"
-                                onClick={() => updateApplicationStatus(app.id, 'rejected')}
-                              >
-                                Reject
-                              </Button>
-                            </>
-                          )}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-            
-            {applications.length === 0 && (
-              <div className="text-center py-8">
-                <p className="text-gray-500">No applications found</p>
-              </div>
-            )}
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-4">
+                <TabsTrigger value="all">All ({statusCounts.all})</TabsTrigger>
+                <TabsTrigger value="pending">Pending ({statusCounts.pending})</TabsTrigger>
+                <TabsTrigger value="approved">Approved ({statusCounts.approved})</TabsTrigger>
+                <TabsTrigger value="rejected">Rejected ({statusCounts.rejected})</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value={activeTab} className="mt-6">
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Founder</TableHead>
+                        <TableHead>Startup</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Phone</TableHead>
+                        <TableHead>Centre</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Applied</TableHead>
+                        <TableHead>Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredApplications.map((app) => (
+                        <TableRow key={app.id}>
+                          <TableCell className="font-medium">{app.founder_name}</TableCell>
+                          <TableCell>{app.startup_name}</TableCell>
+                          <TableCell>{app.email}</TableCell>
+                          <TableCell>{app.phone}</TableCell>
+                          <TableCell>{app.incubation_centre}</TableCell>
+                          <TableCell>
+                            <Badge variant={getStatusBadgeVariant(app.status)}>
+                              {app.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            {new Date(app.created_at).toLocaleDateString()}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex gap-2">
+                              {app.status === 'pending' && (
+                                <>
+                                  <Button
+                                    size="sm"
+                                    onClick={() => updateApplicationStatus(app.id, 'approved')}
+                                    className="bg-green-600 hover:bg-green-700"
+                                  >
+                                    Approve
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="destructive"
+                                    onClick={() => updateApplicationStatus(app.id, 'rejected')}
+                                  >
+                                    Reject
+                                  </Button>
+                                </>
+                              )}
+                              {app.status === 'approved' && (
+                                <span className="text-sm text-green-600">
+                                  ✅ Approved {app.approved_at && `on ${new Date(app.approved_at).toLocaleDateString()}`}
+                                </span>
+                              )}
+                              {app.status === 'rejected' && (
+                                <span className="text-sm text-red-600">
+                                  ❌ Rejected {app.rejected_at && `on ${new Date(app.rejected_at).toLocaleDateString()}`}
+                                </span>
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+                
+                {filteredApplications.length === 0 && (
+                  <div className="text-center py-8">
+                    <p className="text-gray-500">No applications found for this filter</p>
+                  </div>
+                )}
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
       </div>

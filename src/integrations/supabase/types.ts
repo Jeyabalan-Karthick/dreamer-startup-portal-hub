@@ -11,6 +11,8 @@ export type Database = {
     Tables: {
       applications: {
         Row: {
+          admin_notes: string | null
+          approved_at: string | null
           challenges: string | null
           company_type: string
           coupon_code: string
@@ -24,6 +26,7 @@ export type Database = {
           incubation_letter_url: string | null
           phone: string
           registration_certificate_url: string | null
+          rejected_at: string | null
           source: string
           startup_name: string
           status: string | null
@@ -33,6 +36,8 @@ export type Database = {
           website: string | null
         }
         Insert: {
+          admin_notes?: string | null
+          approved_at?: string | null
           challenges?: string | null
           company_type: string
           coupon_code: string
@@ -46,6 +51,7 @@ export type Database = {
           incubation_letter_url?: string | null
           phone: string
           registration_certificate_url?: string | null
+          rejected_at?: string | null
           source: string
           startup_name: string
           status?: string | null
@@ -55,6 +61,8 @@ export type Database = {
           website?: string | null
         }
         Update: {
+          admin_notes?: string | null
+          approved_at?: string | null
           challenges?: string | null
           company_type?: string
           coupon_code?: string
@@ -68,6 +76,7 @@ export type Database = {
           incubation_letter_url?: string | null
           phone?: string
           registration_certificate_url?: string | null
+          rejected_at?: string | null
           source?: string
           startup_name?: string
           status?: string | null
