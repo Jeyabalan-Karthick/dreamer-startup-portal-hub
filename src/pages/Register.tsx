@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Register = () => {
   const [searchParams] = useSearchParams();
@@ -42,18 +43,54 @@ const Register = () => {
     setIsLoading(true);
     console.log('Registration attempt:', { email: formData.email, couponCode: formData.couponCode });
     
-    // TODO: Implement Firebase Auth registration
-    toast({
-      title: "Registration Successful",
-      description: "Please check your email for verification",
-    });
-    
-    // For now, redirect to application form
-    setTimeout(() => {
-      navigate('/application');
-    }, 2000);
-    
-    setIsLoading(false);
+    try {
+      const redirectUrl = `${window.location.origin}/application`;
+      
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: {
+            coupon_code: formData.couponCode
+          }
+        }
+      });
+
+      if (error) {
+        console.error('Registration error:', error);
+        toast({
+          title: "Registration Failed",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      console.log('Registration successful:', data);
+      
+      if (data.user && !data.user.email_confirmed_at) {
+        toast({
+          title: "Registration Successful",
+          description: "Please check your email and click the verification link to complete your registration.",
+        });
+      } else {
+        toast({
+          title: "Registration Successful",
+          description: "Welcome! You can now access the application.",
+        });
+        navigate('/application');
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      toast({
+        title: "Registration Failed",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {

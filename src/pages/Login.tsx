@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -21,18 +22,40 @@ const Login = () => {
     
     console.log('Login attempt:', { email: formData.email });
     
-    // TODO: Implement Firebase Auth login
-    toast({
-      title: "Login Successful",
-      description: "Welcome back!",
-    });
-    
-    // For now, redirect to application form
-    setTimeout(() => {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
+      });
+
+      if (error) {
+        console.error('Login error:', error);
+        toast({
+          title: "Login Failed",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      console.log('Login successful:', data);
+      toast({
+        title: "Login Successful",
+        description: "Welcome back!",
+      });
+      
+      // Redirect to application form
       navigate('/application');
-    }, 1000);
-    
-    setIsLoading(false);
+    } catch (error) {
+      console.error('Login error:', error);
+      toast({
+        title: "Login Failed",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
