@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import FounderDetailsStep from '../components/application/FounderDetailsStep';
 import IncubationInfoStep from '../components/application/IncubationInfoStep';
 import StartupIdeaStep from '../components/application/StartupIdeaStep';
@@ -11,6 +12,7 @@ import ApplicationSuccess from '../components/application/ApplicationSuccess';
 import CongratulationsModal from '../components/CongratulationsModal';
 
 const Application = () => {
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [userApplication, setUserApplication] = useState(null);
   const [currentStep, setCurrentStep] = useState(1);
@@ -45,18 +47,21 @@ const Application = () => {
   ];
 
   useEffect(() => {
-    checkUserApplication();
-  }, []);
+    if (user) {
+      checkUserApplication();
+    }
+  }, [user]);
 
   const checkUserApplication = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        setLoading(false);
-        return;
-      }
+    if (!user?.email) {
+      console.error('No user email available');
+      setLoading(false);
+      return;
+    }
 
+    try {
+      console.log('Checking application for user:', user.email);
+      
       // Check if user has an existing application
       const { data: applications, error } = await supabase
         .from('applications')
@@ -69,12 +74,14 @@ const Application = () => {
         console.error('Error checking user application:', error);
         toast({
           title: "Error",
-          description: "Failed to check application status",
+          description: "Failed to load application data. Please refresh the page.",
           variant: "destructive",
         });
         setLoading(false);
         return;
       }
+
+      console.log('Applications found:', applications);
 
       if (applications && applications.length > 0) {
         const application = applications[0];
@@ -93,7 +100,12 @@ const Application = () => {
       
       setLoading(false);
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Error in checkUserApplication:', error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please refresh the page.",
+        variant: "destructive",
+      });
       setLoading(false);
     }
   };
@@ -153,7 +165,7 @@ const Application = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Checking application status...</p>
+          <p className="mt-4 text-gray-600">Loading application data...</p>
         </div>
       </div>
     );
