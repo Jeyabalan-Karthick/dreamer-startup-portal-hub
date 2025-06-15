@@ -1,8 +1,8 @@
 
 import { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Gift, Sparkles, Users, Download, Phone, Mail, X, PartyPopper } from 'lucide-react';
+import { Gift, Sparkles, Users, Download, Phone, Mail, X } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 import confetti from 'canvas-confetti';
 
@@ -13,81 +13,40 @@ interface CongratulationsModalProps {
 }
 
 const CongratulationsModal = ({ isOpen, onClose, applicationData }: CongratulationsModalProps) => {
-  const [showFullContent, setShowFullContent] = useState(false);
-
   useEffect(() => {
     if (isOpen) {
-      // Initial confetti burst
-      confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 },
-        colors: ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b']
-      });
+      // Trigger confetti when modal opens
+      const duration = 3000;
+      const end = Date.now() + duration;
 
-      // Show initial popup, then full content
-      setTimeout(() => {
-        setShowFullContent(true);
-        // Continuous confetti
-        const duration = 3000;
-        const end = Date.now() + duration;
-        const colors = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b'];
+      const colors = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b'];
 
-        (function frame() {
-          confetti({
-            particleCount: 2,
-            angle: 60,
-            spread: 55,
-            origin: { x: 0 },
-            colors: colors
-          });
-          confetti({
-            particleCount: 2,
-            angle: 120,
-            spread: 55,
-            origin: { x: 1 },
-            colors: colors
-          });
+      (function frame() {
+        confetti({
+          particleCount: 2,
+          angle: 60,
+          spread: 55,
+          origin: { x: 0 },
+          colors: colors
+        });
+        confetti({
+          particleCount: 2,
+          angle: 120,
+          spread: 55,
+          origin: { x: 1 },
+          colors: colors
+        });
 
-          if (Date.now() < end) {
-            requestAnimationFrame(frame);
-          }
-        }());
-      }, 1000);
-    } else {
-      setShowFullContent(false);
+        if (Date.now() < end) {
+          requestAnimationFrame(frame);
+        }
+      }());
     }
   }, [isOpen]);
-
-  if (!showFullContent) {
-    return (
-      <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-md p-0 bg-gradient-to-br from-green-400 to-emerald-500 border-0 shadow-2xl overflow-hidden">
-          <DialogTitle className="sr-only">Congratulations!</DialogTitle>
-          <DialogDescription className="sr-only">Your application has been approved</DialogDescription>
-          
-          <div className="relative text-center text-white p-8">
-            <div className="animate-bounce mb-4">
-              <PartyPopper className="w-16 h-16 mx-auto text-yellow-300" />
-            </div>
-            <h1 className="text-3xl font-bold mb-2 animate-pulse">🎉 CONGRATULATIONS! 🎉</h1>
-            <p className="text-xl font-medium mb-4">Your application has been</p>
-            <div className="text-4xl font-bold bg-white text-green-600 rounded-full px-6 py-2 inline-block mb-4 animate-pulse">
-              APPROVED!
-            </div>
-            <p className="text-lg">Get ready for amazing benefits...</p>
-          </div>
-        </DialogContent>
-      </Dialog>
-    );
-  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl p-0 bg-gradient-to-br from-green-50 to-emerald-50 border-0 shadow-2xl">
-        <DialogTitle className="sr-only">Congratulations - Application Approved</DialogTitle>
-        <DialogDescription className="sr-only">Your startup application has been approved with ₹40,000 worth of benefits</DialogDescription>
-        
         <div className="relative overflow-hidden">
           {/* Close Button */}
           <Button

@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,24 +7,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { user, loading: authLoading } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
   const [isLoading, setIsLoading] = useState(false);
-
-  // Redirect if already authenticated
-  useEffect(() => {
-    if (!authLoading && user) {
-      console.log('User already authenticated, redirecting to application');
-      navigate('/application');
-    }
-  }, [user, authLoading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,7 +44,8 @@ const Login = () => {
         description: "Welcome back!",
       });
       
-      // Navigation will be handled by useAuth hook
+      // Redirect to application form
+      navigate('/application');
     } catch (error) {
       console.error('Login error:', error);
       toast({
@@ -73,23 +64,6 @@ const Login = () => {
       [e.target.name]: e.target.value
     }));
   };
-
-  // Show loading while checking auth state
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Don't render if user is already authenticated (will redirect)
-  if (user) {
-    return null;
-  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
