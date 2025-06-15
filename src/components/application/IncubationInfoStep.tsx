@@ -1,10 +1,18 @@
 
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+
+interface IncubationCenter {
+  id: string;
+  name: string;
+  admin_email: string;
+}
 
 interface IncubationInfoStepProps {
   data: any;
@@ -14,6 +22,43 @@ interface IncubationInfoStepProps {
 }
 
 const IncubationInfoStep = ({ data, updateData, onNext, onPrev }: IncubationInfoStepProps) => {
+  const [incubationCenters, setIncubationCenters] = useState<IncubationCenter[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchIncubationCenters();
+  }, []);
+
+  const fetchIncubationCenters = async () => {
+    try {
+      const { data: centers, error } = await supabase
+        .from('incubation_centres')
+        .select('*')
+        .order('name');
+
+      if (error) {
+        console.error('Error fetching incubation centers:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load incubation centers",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setIncubationCenters(centers || []);
+    } catch (error) {
+      console.error('Error:', error);
+      toast({
+        title: "Error", 
+        description: "Failed to load incubation centers",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleInputChange = (field: string, value: string) => {
     updateData({ [field]: value });
   };
@@ -39,6 +84,19 @@ const IncubationInfoStep = ({ data, updateData, onNext, onPrev }: IncubationInfo
     onNext();
   };
 
+  if (loading) {
+    return (
+      <Card className="border-gray-200">
+        <CardContent className="pt-6">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+            <p className="mt-2 text-gray-600">Loading incubation centers...</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="border-gray-200">
       <CardHeader>
@@ -53,13 +111,11 @@ const IncubationInfoStep = ({ data, updateData, onNext, onPrev }: IncubationInfo
                 <SelectValue placeholder="Choose your preferred incubation centre" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="dreamers-mumbai">Dreamers Mumbai</SelectItem>
-                <SelectItem value="dreamers-delhi">Dreamers Delhi</SelectItem>
-                <SelectItem value="dreamers-bangalore">Dreamers Bangalore</SelectItem>
-                <SelectItem value="dreamers-pune">Dreamers Pune</SelectItem>
-                <SelectItem value="dreamers-hyderabad">Dreamers Hyderabad</SelectItem>
-                <SelectItem value="dreamers-tirunelveli">Dreamers Tirunelveli</SelectItem>
-                <SelectItem value="startup-tvl">STARTUP TVL</SelectItem>
+                {incubationCenters.map((center) => (
+                  <SelectItem key={center.id} value={center.name}>
+                    {center.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
