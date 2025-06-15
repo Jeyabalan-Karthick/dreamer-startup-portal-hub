@@ -28,96 +28,16 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (tokenError || !approvalToken) {
       console.error('Token not found or already used:', tokenError);
-      return new Response(`
-        <html>
-          <head>
-            <title>Invalid Link - Dreamers Incubation</title>
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <style>
-              body { 
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
-                margin: 0; 
-                padding: 40px 20px; 
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                min-height: 100vh;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-              }
-              .container { 
-                max-width: 500px; 
-                background: white; 
-                padding: 40px; 
-                border-radius: 20px; 
-                box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-                text-align: center;
-              }
-              .error { color: #ef4444; }
-              .icon { font-size: 48px; margin-bottom: 20px; }
-            </style>
-          </head>
-          <body>
-            <div class="container">
-              <div class="icon">❌</div>
-              <h1 class="error">Invalid or Expired Link</h1>
-              <p>This approval link is invalid or has already been used.</p>
-              <p>If you need to review an application, please check your email for a valid link.</p>
-            </div>
-          </body>
-        </html>
-      `, {
-        status: 400,
-        headers: { 'Content-Type': 'text/html' },
-      });
+      return createErrorPage('Invalid or Expired Link', 'This approval link is invalid or has already been used.');
     }
 
     // Check if token is expired
     if (new Date(approvalToken.expires_at) < new Date()) {
       console.log('Token expired:', approvalToken.expires_at);
-      return new Response(`
-        <html>
-          <head>
-            <title>Link Expired - Dreamers Incubation</title>
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <style>
-              body { 
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
-                margin: 0; 
-                padding: 40px 20px; 
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                min-height: 100vh;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-              }
-              .container { 
-                max-width: 500px; 
-                background: white; 
-                padding: 40px; 
-                border-radius: 20px; 
-                box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-                text-align: center;
-              }
-              .warning { color: #f59e0b; }
-              .icon { font-size: 48px; margin-bottom: 20px; }
-            </style>
-          </head>
-          <body>
-            <div class="container">
-              <div class="icon">⏰</div>
-              <h1 class="warning">Link Expired</h1>
-              <p>This approval link has expired (valid for 7 days).</p>
-              <p>Please contact the system administrator if you need to review this application.</p>
-            </div>
-          </body>
-        </html>
-      `, {
-        status: 400,
-        headers: { 'Content-Type': 'text/html' },
-      });
+      return createErrorPage('Link Expired', 'This approval link has expired (valid for 7 days).');
     }
 
-    // Get application details for better messaging
+    // Get application details
     const { data: application, error: appError } = await supabaseClient
       .from('applications')
       .select('founder_name, startup_name, incubation_centre')
@@ -140,46 +60,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (updateError) {
       console.error('Error updating application:', updateError);
-      return new Response(`
-        <html>
-          <head>
-            <title>Error - Dreamers Incubation</title>
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <style>
-              body { 
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
-                margin: 0; 
-                padding: 40px 20px; 
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                min-height: 100vh;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-              }
-              .container { 
-                max-width: 500px; 
-                background: white; 
-                padding: 40px; 
-                border-radius: 20px; 
-                box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-                text-align: center;
-              }
-              .error { color: #ef4444; }
-              .icon { font-size: 48px; margin-bottom: 20px; }
-            </style>
-          </head>
-          <body>
-            <div class="container">
-              <div class="icon">❌</div>
-              <h1 class="error">Error Processing Request</h1>
-              <p>There was an error processing your approval. Please try again or contact support.</p>
-            </div>
-          </body>
-        </html>
-      `, { 
-        status: 500,
-        headers: { 'Content-Type': 'text/html' },
-      });
+      return createErrorPage('Error Processing Request', 'There was an error processing your approval. Please try again or contact support.');
     }
 
     // Mark token as used
@@ -202,146 +83,156 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log('Application', newStatus, 'successfully');
 
-    const actionText = approvalToken.action === 'approve' ? 'approved' : 'rejected';
-    const actionColor = approvalToken.action === 'approve' ? '#10b981' : '#ef4444';
-    const actionIcon = approvalToken.action === 'approve' ? '🎉' : '😔';
-
-    return new Response(`
-      <html>
-        <head>
-          <title>Application ${actionText.toUpperCase()} - Dreamers Incubation</title>
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <style>
-            body { 
-              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
-              margin: 0; 
-              padding: 40px 20px; 
-              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-              min-height: 100vh;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-            }
-            .container { 
-              max-width: 600px; 
-              background: white; 
-              padding: 40px; 
-              border-radius: 20px; 
-              box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-              text-align: center;
-            }
-            .success { color: ${actionColor}; }
-            .icon { font-size: 64px; margin-bottom: 20px; }
-            .details { 
-              background: #f8fafc; 
-              padding: 25px; 
-              border-radius: 12px; 
-              margin: 25px 0; 
-              text-align: left;
-            }
-            .detail-row {
-              display: flex;
-              justify-content: space-between;
-              padding: 10px 0;
-              border-bottom: 1px solid #e2e8f0;
-            }
-            .detail-row:last-child {
-              border-bottom: none;
-            }
-            .status-badge {
-              display: inline-block;
-              background: ${actionColor};
-              color: white;
-              padding: 8px 20px;
-              border-radius: 25px;
-              font-weight: 600;
-              font-size: 14px;
-              margin: 20px 0;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <div class="icon">${actionIcon}</div>
-            <h1 class="success">Application ${actionText.toUpperCase()}!</h1>
-            <div class="status-badge">${actionText.toUpperCase()}</div>
-            
-            ${application ? `
-            <div class="details">
-              <div class="detail-row">
-                <strong>Startup:</strong>
-                <span>${application.startup_name}</span>
-              </div>
-              <div class="detail-row">
-                <strong>Founder:</strong>
-                <span>${application.founder_name}</span>
-              </div>
-              <div class="detail-row">
-                <strong>Incubation Centre:</strong>
-                <span>${application.incubation_centre}</span>
-              </div>
-            </div>
-            ` : ''}
-            
-            <p><strong>The application has been successfully ${actionText}.</strong></p>
-            <p>✅ The applicant has been notified automatically via email.</p>
-            
-            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
-              <p style="color: #64748b; font-size: 14px;">
-                Thank you for reviewing this application for ${application?.incubation_centre || 'your incubation center'}.
-              </p>
-            </div>
-          </div>
-        </body>
-      </html>
-    `, {
-      status: 200,
-      headers: { 'Content-Type': 'text/html' },
-    });
+    return createSuccessPage(approvalToken.action, application);
 
   } catch (error: any) {
     console.error("Error in handle-approval function:", error);
-    return new Response(`
-      <html>
-        <head>
-          <title>Error - Dreamers Incubation</title>
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <style>
-            body { 
-              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
-              margin: 0; 
-              padding: 40px 20px; 
-              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-              min-height: 100vh;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-            }
-            .container { 
-              max-width: 500px; 
-              background: white; 
-              padding: 40px; 
-              border-radius: 20px; 
-              box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-              text-align: center;
-            }
-            .error { color: #ef4444; }
-            .icon { font-size: 48px; margin-bottom: 20px; }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <div class="icon">❌</div>
-            <h1 class="error">Internal Server Error</h1>
-            <p>An unexpected error occurred. Please try again later or contact support.</p>
-          </div>
-        </body>
-      </html>
-    `, { 
-      status: 500,
-      headers: { 'Content-Type': 'text/html' },
-    });
+    return createErrorPage('Internal Server Error', 'An unexpected error occurred. Please try again later or contact support.');
   }
 };
+
+function createErrorPage(title: string, message: string): Response {
+  return new Response(`
+    <!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${title} - Dreamers Incubation</title>
+        <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+      </head>
+      <body class="bg-gradient-to-br from-red-50 to-pink-50 min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center">
+          <div class="mb-6">
+            <div class="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+              <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </div>
+            <h1 class="text-2xl font-bold text-red-600 mb-2">${title}</h1>
+            <p class="text-gray-600">${message}</p>
+          </div>
+          <button onclick="window.close()" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
+            Close
+          </button>
+        </div>
+        <script>
+          // Auto close after 5 seconds
+          setTimeout(() => {
+            window.close();
+          }, 5000);
+        </script>
+      </body>
+    </html>
+  `, {
+    status: 400,
+    headers: { 'Content-Type': 'text/html' },
+  });
+}
+
+function createSuccessPage(action: string, application: any): Response {
+  const isApproval = action === 'approve';
+  const statusText = isApproval ? 'APPROVED' : 'REJECTED';
+  const statusColor = isApproval ? 'green' : 'red';
+  const statusIcon = isApproval ? '🎉' : '❌';
+  const bgColor = isApproval ? 'from-green-50 to-emerald-50' : 'from-red-50 to-pink-50';
+  
+  return new Response(`
+    <!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Application ${statusText} - Dreamers Incubation</title>
+        <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+      </head>
+      <body class="bg-gradient-to-br ${bgColor} min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-lg w-full text-center">
+          <div class="mb-6">
+            <div class="text-6xl mb-4">${statusIcon}</div>
+            <h1 class="text-3xl font-bold text-${statusColor}-600 mb-2">Application ${statusText}!</h1>
+            <div class="inline-block bg-${statusColor}-100 text-${statusColor}-800 px-4 py-2 rounded-full font-semibold mb-4">
+              ${statusText}
+            </div>
+          </div>
+          
+          ${application ? `
+          <div class="bg-gray-50 rounded-xl p-6 mb-6">
+            <h3 class="font-semibold text-gray-800 mb-4">Application Details</h3>
+            <div class="space-y-2 text-sm">
+              <div class="flex justify-between">
+                <span class="text-gray-600">Startup:</span>
+                <span class="font-semibold">${application.startup_name}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-600">Founder:</span>
+                <span class="font-semibold">${application.founder_name}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-600">Incubation Centre:</span>
+                <span class="font-semibold">${application.incubation_centre}</span>
+              </div>
+            </div>
+          </div>
+          ` : ''}
+          
+          <div class="mb-6">
+            <p class="text-gray-700 mb-2">
+              <strong>The application has been successfully ${action === 'approve' ? 'approved' : 'rejected'}.</strong>
+            </p>
+            <p class="text-sm text-gray-600">
+              ✅ The applicant has been notified automatically via email.
+            </p>
+          </div>
+          
+          <button onclick="showSuccessAlert()" class="bg-${statusColor}-600 hover:bg-${statusColor}-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors mb-4 mr-4">
+            Show Success Message
+          </button>
+          <button onclick="window.close()" class="bg-gray-600 hover:bg-gray-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors">
+            Close
+          </button>
+          
+          <div class="mt-6 pt-4 border-t border-gray-200">
+            <p class="text-xs text-gray-500">
+              Thank you for reviewing this application for ${application?.incubation_centre || 'your incubation center'}.
+            </p>
+          </div>
+        </div>
+        
+        <script>
+          ${isApproval ? `
+          // Trigger confetti for approvals
+          confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.6 }
+          });
+          ` : ''}
+          
+          function showSuccessAlert() {
+            Swal.fire({
+              title: '${statusText}!',
+              text: 'Application has been ${action === 'approve' ? 'approved' : 'rejected'} successfully!',
+              icon: '${isApproval ? 'success' : 'info'}',
+              confirmButtonText: 'Great!',
+              confirmButtonColor: '${isApproval ? '#10b981' : '#ef4444'}'
+            });
+          }
+          
+          // Auto close after 10 seconds
+          setTimeout(() => {
+            window.close();
+          }, 10000);
+        </script>
+      </body>
+    </html>
+  `, {
+    status: 200,
+    headers: { 'Content-Type': 'text/html' },
+  });
+}
 
 serve(handler);
