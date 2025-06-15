@@ -27,6 +27,8 @@ const handler = async (req: Request): Promise<Response> => {
 
     const { applicationId }: EmailRequest = await req.json();
 
+    console.log('Processing approval email for application:', applicationId);
+
     // Get application details
     const { data: application, error: appError } = await supabaseClient
       .from('applications')
@@ -42,7 +44,9 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    // Get incubation center admin email
+    console.log('Application found:', application.startup_name, 'for centre:', application.incubation_centre);
+
+    // Get incubation center admin email based on the selected centre
     const { data: incubationCenter, error: centerError } = await supabaseClient
       .from('incubation_centres')
       .select('admin_email, name')
@@ -51,11 +55,14 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (centerError || !incubationCenter) {
       console.error('Incubation center not found:', centerError);
+      console.error('Looking for centre:', application.incubation_centre);
       return new Response(JSON.stringify({ error: 'Incubation center not found' }), {
         status: 404,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    console.log('Sending email to incubation center admin:', incubationCenter.admin_email);
 
     // Create approval tokens with expiration date (7 days from now)
     const approveToken = crypto.randomUUID();
@@ -88,7 +95,9 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    // Send email to admin
+    console.log('Approval tokens created successfully');
+
+    // Send email to incubation center admin (not generic admin)
     const approveUrl = `${Deno.env.get('SUPABASE_URL')}/functions/v1/handle-approval?token=${approveToken}`;
     const rejectUrl = `${Deno.env.get('SUPABASE_URL')}/functions/v1/handle-approval?token=${rejectToken}`;
 
@@ -97,39 +106,100 @@ const handler = async (req: Request): Promise<Response> => {
       to: [incubationCenter.admin_email],
       subject: `New Application for ${incubationCenter.name}`,
       html: `
-        <h2>New Application Received</h2>
-        <p>A new application has been submitted for ${incubationCenter.name}.</p>
-        
-        <h3>Application Details:</h3>
-        <ul>
-          <li><strong>Founder:</strong> ${application.founder_name}</li>
-          <li><strong>Startup:</strong> ${application.startup_name}</li>
-          <li><strong>Email:</strong> ${application.email}</li>
-          <li><strong>Phone:</strong> ${application.phone}</li>
-          <li><strong>Company Type:</strong> ${application.company_type}</li>
-          <li><strong>Team Size:</strong> ${application.team_size}</li>
-          <li><strong>Website:</strong> ${application.website || 'Not provided'}</li>
-        </ul>
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+            <h2 style="color: #333; margin: 0 0 10px 0;">New Startup Application Received</h2>
+            <p style="margin: 0; color: #666;">A new startup has applied to join ${incubationCenter.name}</p>
+          </div>
+          
+          <div style="background-color: white; border: 1px solid #e9ecef; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+            <h3 style="color: #333; margin-top: 0;">Application Details:</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold; color: #555;">Founder Name:</td>
+                <td style="padding: 8px 0; color: #333;">${application.founder_name}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold; color: #555;">Startup Name:</td>
+                <td style="padding: 8px 0; color: #333;">${application.startup_name}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold; color: #555;">Email:</td>
+                <td style="padding: 8px 0; color: #333;">${application.email}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold; color: #555;">Phone:</td>
+                <td style="padding: 8px 0; color: #333;">${application.phone}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold; color: #555;">Company Type:</td>
+                <td style="padding: 8px 0; color: #333;">${application.company_type}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold; color: #555;">Team Size:</td>
+                <td style="padding: 8px 0; color: #333;">${application.team_size}</td>
+              </tr>
+              ${application.website ? `
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold; color: #555;">Website:</td>
+                <td style="padding: 8px 0; color: #333;"><a href="${application.website}" target="_blank">${application.website}</a></td>
+              </tr>
+              ` : ''}
+            </table>
+          </div>
 
-        <h3>Startup Idea:</h3>
-        <p>${application.idea_description}</p>
+          <div style="background-color: white; border: 1px solid #e9ecef; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+            <h3 style="color: #333; margin-top: 0;">Startup Idea:</h3>
+            <p style="color: #333; line-height: 1.6; margin: 0;">${application.idea_description}</p>
+          </div>
 
-        <div style="margin: 30px 0;">
-          <a href="${approveUrl}" style="background-color: #10b981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin-right: 10px;">
-            ✅ APPROVE APPLICATION
-          </a>
-          <a href="${rejectUrl}" style="background-color: #ef4444; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">
-            ❌ REJECT APPLICATION
-          </a>
+          ${application.expectations && application.expectations.length > 0 ? `
+          <div style="background-color: white; border: 1px solid #e9ecef; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+            <h3 style="color: #333; margin-top: 0;">Expectations from Incubation:</h3>
+            <ul style="color: #333; margin: 0; padding-left: 20px;">
+              ${application.expectations.map(exp => `<li style="margin-bottom: 5px;">${exp}</li>`).join('')}
+            </ul>
+          </div>
+          ` : ''}
+
+          ${application.challenges ? `
+          <div style="background-color: white; border: 1px solid #e9ecef; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
+            <h3 style="color: #333; margin-top: 0;">Current Challenges:</h3>
+            <p style="color: #333; line-height: 1.6; margin: 0;">${application.challenges}</p>
+          </div>
+          ` : ''}
+
+          <div style="text-align: center; margin: 30px 0;">
+            <p style="color: #333; margin-bottom: 20px; font-weight: bold;">Please review this application and make your decision:</p>
+            <div style="margin: 20px 0;">
+              <a href="${approveUrl}" 
+                 style="background-color: #28a745; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 0 10px; display: inline-block; font-weight: bold;">
+                ✅ APPROVE APPLICATION
+              </a>
+              <a href="${rejectUrl}" 
+                 style="background-color: #dc3545; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 0 10px; display: inline-block; font-weight: bold;">
+                ❌ REJECT APPLICATION
+              </a>
+            </div>
+          </div>
+
+          <div style="border-top: 1px solid #e9ecef; padding-top: 20px; text-align: center;">
+            <p style="color: #666; font-size: 12px; margin: 0;">
+              <strong>Important:</strong> These approval links will expire in 7 days.<br>
+              This email was sent to you as the admin of ${incubationCenter.name}.
+            </p>
+          </div>
         </div>
-
-        <p><small>These links will expire in 7 days.</small></p>
       `,
     });
 
-    console.log("Email sent successfully:", emailResponse);
+    console.log("Email sent successfully to:", incubationCenter.admin_email, emailResponse);
 
-    return new Response(JSON.stringify({ success: true }), {
+    return new Response(JSON.stringify({ 
+      success: true, 
+      message: `Email sent to ${incubationCenter.name} admin`,
+      adminEmail: incubationCenter.admin_email
+    }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

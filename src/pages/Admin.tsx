@@ -27,7 +27,6 @@ interface Application {
   idea_description: string;
   expectations: string[];
   challenges?: string;
-  admin_notes?: string;
 }
 
 interface IncubationCentre {
@@ -130,41 +129,6 @@ const Admin = () => {
     }
   };
 
-  const updateApplicationStatus = async (id: string, status: string) => {
-    try {
-      const timestampField = status === 'approved' ? 'approved_at' : status === 'rejected' ? 'rejected_at' : null;
-      const updateData: any = { status };
-      
-      if (timestampField) {
-        updateData[timestampField] = new Date().toISOString();
-      }
-
-      const { error } = await supabase
-        .from('applications')
-        .update(updateData)
-        .eq('id', id);
-
-      if (error) {
-        console.error('Error updating status:', error);
-        toast({
-          title: "Error",
-          description: "Failed to update application status",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      toast({
-        title: "Success",
-        description: "Application status updated",
-      });
-
-      fetchApplications();
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  };
-
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
       case 'approved':
@@ -219,7 +183,7 @@ const Admin = () => {
       <div className="container mx-auto px-4 max-w-7xl">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Dashboard</h1>
-          <p className="text-gray-600">Manage startup applications and incubation centers</p>
+          <p className="text-gray-600">View startup applications and manage incubation centers</p>
         </div>
 
         {/* Add New Incubation Centre */}
@@ -270,10 +234,11 @@ const Admin = () => {
           </CardContent>
         </Card>
 
-        {/* Applications with Tabs */}
+        {/* Applications View Only */}
         <Card>
           <CardHeader>
-            <CardTitle>Applications Management</CardTitle>
+            <CardTitle>Applications Overview</CardTitle>
+            <p className="text-sm text-gray-600">View-only dashboard for application status monitoring</p>
           </CardHeader>
           <CardContent>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -296,7 +261,7 @@ const Admin = () => {
                         <TableHead>Centre</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead>Applied</TableHead>
-                        <TableHead>Actions</TableHead>
+                        <TableHead>Action Date</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -316,36 +281,21 @@ const Admin = () => {
                             {new Date(app.created_at).toLocaleDateString()}
                           </TableCell>
                           <TableCell>
-                            <div className="flex gap-2">
-                              {app.status === 'pending' && (
-                                <>
-                                  <Button
-                                    size="sm"
-                                    onClick={() => updateApplicationStatus(app.id, 'approved')}
-                                    className="bg-green-600 hover:bg-green-700"
-                                  >
-                                    Approve
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="destructive"
-                                    onClick={() => updateApplicationStatus(app.id, 'rejected')}
-                                  >
-                                    Reject
-                                  </Button>
-                                </>
-                              )}
-                              {app.status === 'approved' && (
-                                <span className="text-sm text-green-600">
-                                  ✅ Approved {app.approved_at && `on ${new Date(app.approved_at).toLocaleDateString()}`}
-                                </span>
-                              )}
-                              {app.status === 'rejected' && (
-                                <span className="text-sm text-red-600">
-                                  ❌ Rejected {app.rejected_at && `on ${new Date(app.rejected_at).toLocaleDateString()}`}
-                                </span>
-                              )}
-                            </div>
+                            {app.status === 'approved' && app.approved_at && (
+                              <span className="text-sm text-green-600">
+                                ✅ {new Date(app.approved_at).toLocaleDateString()}
+                              </span>
+                            )}
+                            {app.status === 'rejected' && app.rejected_at && (
+                              <span className="text-sm text-red-600">
+                                ❌ {new Date(app.rejected_at).toLocaleDateString()}
+                              </span>
+                            )}
+                            {app.status === 'pending' && (
+                              <span className="text-sm text-gray-500">
+                                ⏳ Awaiting review
+                              </span>
+                            )}
                           </TableCell>
                         </TableRow>
                       ))}
