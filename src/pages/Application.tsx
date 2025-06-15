@@ -8,11 +8,13 @@ import FounderDetailsStep from '../components/application/FounderDetailsStep';
 import IncubationInfoStep from '../components/application/IncubationInfoStep';
 import StartupIdeaStep from '../components/application/StartupIdeaStep';
 import ApplicationSuccess from '../components/application/ApplicationSuccess';
+import CongratulationsModal from '../components/CongratulationsModal';
 
 const Application = () => {
   const [loading, setLoading] = useState(true);
   const [userApplication, setUserApplication] = useState(null);
   const [currentStep, setCurrentStep] = useState(1);
+  const [showCongratulationsModal, setShowCongratulationsModal] = useState(false);
   const [applicationData, setApplicationData] = useState({
     // Step 1: Founder Details
     founderName: '',
@@ -78,11 +80,14 @@ const Application = () => {
         const application = applications[0];
         setUserApplication(application);
         
-        // If application exists and is approved, show success page
+        // Show congratulations modal for newly approved applications
         if (application.status === 'approved') {
-          // User will see the ApplicationSuccess component
-        } else if (application.status === 'pending' || application.status === 'rejected') {
-          // User will see the ApplicationSuccess component with current status
+          // Check if we should show the modal (first time seeing approval)
+          const hasSeenCongratulations = localStorage.getItem(`congratulations_${application.id}`);
+          if (!hasSeenCongratulations) {
+            setShowCongratulationsModal(true);
+            localStorage.setItem(`congratulations_${application.id}`, 'true');
+          }
         }
       }
       
@@ -156,7 +161,16 @@ const Application = () => {
 
   // If user has an existing application, show the success component
   if (userApplication) {
-    return <ApplicationSuccess applicationId={userApplication.id} />;
+    return (
+      <>
+        <ApplicationSuccess applicationId={userApplication.id} />
+        <CongratulationsModal 
+          isOpen={showCongratulationsModal}
+          onClose={() => setShowCongratulationsModal(false)}
+          applicationData={userApplication}
+        />
+      </>
+    );
   }
 
   // If no application exists, show the application form
