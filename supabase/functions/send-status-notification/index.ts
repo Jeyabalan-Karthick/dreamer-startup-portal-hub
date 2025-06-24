@@ -1,9 +1,14 @@
-
+// @ts-nocheck
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { Resend } from "npm:resend@2.0.0";
 
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+// Hardcoded environment variables for demonstration (replace with Deno.env.get in production)
+const SUPABASE_URL = "https://490e270997267f3aaf7e38323c37a1040652ac9c5dd6d77ffdf49b2972a00994.supabase.co";
+const SUPABASE_SERVICE_ROLE_KEY = "52f93ee2fd012031c20ac17fceb793ea766e1d8ac5061b37413e9ecdc2ae7435";
+const RESEND_API_KEY = "0a3fa35fd75ddbce7affd51114f1ba011a18fbd21a16b42705bf7ea815461093";
+
+const resend = new Resend(RESEND_API_KEY);
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -22,8 +27,8 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+      SUPABASE_URL,
+      SUPABASE_SERVICE_ROLE_KEY
     );
 
     const { applicationId, status }: StatusNotificationRequest = await req.json();
@@ -187,7 +192,7 @@ const handler = async (req: Request): Promise<Response> => {
                     <p>You now have access to ₹40,000 worth of benefits including expert consultations, premium resources, and dedicated support.</p>
                     <p>Log in to your account to access all the amazing benefits waiting for you!</p>
                   </div>
-                  <a href="${Deno.env.get('SUPABASE_URL')?.replace('/v1', '') || 'http://localhost:3000'}/login" class="cta-button">
+                  <a href="${SUPABASE_URL.replace('/v1', '') || 'http://localhost:3000'}/login" class="cta-button">
                     Access Your Benefits →
                   </a>
                 ` : `

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -89,6 +88,9 @@ const Application = () => {
             localStorage.setItem(`congratulations_${application.id}`, 'true');
           }
         }
+      } else {
+        // No application exists, set the email in applicationData
+        setApplicationData(prev => ({ ...prev, email: user.email }));
       }
       
       setLoading(false);

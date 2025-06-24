@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -77,8 +76,8 @@ const FounderDetailsStep = ({ data, updateData, onNext }: FounderDetailsStepProp
                 id="email"
                 type="email"
                 value={data.email || ''}
-                onChange={(e) => handleInputChange('email', e.target.value)}
-                className="border-gray-300"
+                readOnly
+                className="border-gray-300 bg-gray-100 cursor-not-allowed"
                 placeholder="Enter your email"
                 required
               />
