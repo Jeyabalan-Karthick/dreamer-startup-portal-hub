@@ -166,7 +166,7 @@ const ApplicationSuccess = ({ applicationId }: ApplicationSuccessProps) => {
                 <div className="grid md:grid-cols-3 gap-4 text-sm text-blue-700">
                   <div className="flex items-center space-x-2">
                     <Mail className="w-4 h-4" />
-                    <span>support@dreamersincubation.com</span>
+                    <span>brandmindzteam@gmail.com</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Phone className="w-4 h-4" />
@@ -234,7 +234,7 @@ const ApplicationSuccess = ({ applicationId }: ApplicationSuccessProps) => {
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
                 <h4 className="font-medium text-blue-800 mb-2">📞 Support Contact</h4>
                 <div className="text-sm text-blue-700">
-                  <p>Email: support@dreamersincubation.com</p>
+                  <p>Email: brandmindzteam@gmail.com</p>
                   <p>Phone: +91-9876543210</p>
                 </div>
               </div>

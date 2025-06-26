@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { format } from 'date-fns';
 
 interface Application {
   id: string;
@@ -35,16 +35,37 @@ interface IncubationCentre {
   admin_email: string;
 }
 
+interface CouponCode {
+  id: string;
+  code: string;
+  max_uses: number;
+  expires_at: string;
+  created_at: string;
+}
+
+interface CouponUsage {
+  id: string;
+  coupon_code_id: string;
+  used_by: string;
+  used_at: string;
+}
+
 const Admin = () => {
   const [applications, setApplications] = useState<Application[]>([]);
   const [incubationCentres, setIncubationCentres] = useState<IncubationCentre[]>([]);
   const [loading, setLoading] = useState(true);
   const [newCentre, setNewCentre] = useState({ name: '', admin_email: '' });
   const [activeTab, setActiveTab] = useState('all');
+  const [couponCodes, setCouponCodes] = useState<CouponCode[]>([]);
+  const [couponUsages, setCouponUsages] = useState<CouponUsage[]>([]);
+  const [newCoupon, setNewCoupon] = useState({ code: '', max_uses: 1, expires_at: '' });
+  const [couponLoading, setCouponLoading] = useState(true);
 
   useEffect(() => {
     fetchApplications();
     fetchIncubationCentres();
+    fetchCouponCodes();
+    fetchCouponUsages();
   }, []);
 
   const fetchApplications = async () => {
@@ -90,6 +111,23 @@ const Admin = () => {
     }
   };
 
+  const fetchCouponCodes = async () => {
+    setCouponLoading(true);
+    const { data, error } = await supabase
+      .from('coupon_codes')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (!error) setCouponCodes(data || []);
+    setCouponLoading(false);
+  };
+
+  const fetchCouponUsages = async () => {
+    const { data, error } = await supabase
+      .from('coupon_code_usages')
+      .select('*');
+    if (!error) setCouponUsages(data || []);
+  };
+
   const addIncubationCentre = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -129,6 +167,24 @@ const Admin = () => {
     }
   };
 
+  const addCouponCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCoupon.code || !newCoupon.max_uses || !newCoupon.expires_at) {
+      toast({ title: 'Error', description: 'Fill all coupon fields', variant: 'destructive' });
+      return;
+    }
+    const { error } = await supabase
+      .from('coupon_codes')
+      .insert([{ ...newCoupon }]);
+    if (error) {
+      toast({ title: 'Error', description: 'Failed to add coupon', variant: 'destructive' });
+      return;
+    }
+    toast({ title: 'Success', description: 'Coupon added!' });
+    setNewCoupon({ code: '', max_uses: 1, expires_at: '' });
+    fetchCouponCodes();
+  };
+
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
       case 'approved':
@@ -163,6 +219,19 @@ const Admin = () => {
       rejected: applications.filter(app => app.status === 'rejected').length,
     };
   };
+
+  // Coupon analytics helpers
+  const getCouponUsageCount = (couponId: string) =>
+    couponUsages.filter(u => u.coupon_code_id === couponId).length;
+  const getCouponStatus = (coupon: CouponCode) => {
+    const used = getCouponUsageCount(coupon.id);
+    const now = new Date();
+    if (new Date(coupon.expires_at) < now) return 'Expired';
+    if (used >= coupon.max_uses) return 'Used Up';
+    return 'Active';
+  };
+  const getCouponRemaining = (coupon: CouponCode) =>
+    Math.max(0, coupon.max_uses - getCouponUsageCount(coupon.id));
 
   if (loading) {
     return (
@@ -310,6 +379,57 @@ const Admin = () => {
                 )}
               </TabsContent>
             </Tabs>
+          </CardContent>
+        </Card>
+
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>Coupon Codes</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={addCouponCode} className="flex gap-4 items-end mb-6">
+              <div>
+                <Label htmlFor="coupon-code">Code</Label>
+                <Input id="coupon-code" value={newCoupon.code} onChange={e => setNewCoupon({ ...newCoupon, code: e.target.value })} />
+              </div>
+              <div>
+                <Label htmlFor="coupon-max">Max Uses</Label>
+                <Input id="coupon-max" type="number" min={1} value={newCoupon.max_uses} onChange={e => setNewCoupon({ ...newCoupon, max_uses: Number(e.target.value) })} />
+              </div>
+              <div>
+                <Label htmlFor="coupon-expiry">Expiry Date</Label>
+                <Input id="coupon-expiry" type="date" value={newCoupon.expires_at} onChange={e => setNewCoupon({ ...newCoupon, expires_at: e.target.value })} />
+              </div>
+              <Button type="submit">Add Coupon</Button>
+            </form>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Code</TableHead>
+                  <TableHead>Max Uses</TableHead>
+                  <TableHead>Used</TableHead>
+                  <TableHead>Remaining</TableHead>
+                  <TableHead>Expiry</TableHead>
+                  <TableHead>Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {couponCodes.map(coupon => (
+                  <TableRow key={coupon.id}>
+                    <TableCell>{coupon.code}</TableCell>
+                    <TableCell>{coupon.max_uses}</TableCell>
+                    <TableCell>{getCouponUsageCount(coupon.id)}</TableCell>
+                    <TableCell>{getCouponRemaining(coupon)}</TableCell>
+                    <TableCell>{format(new Date(coupon.expires_at), 'yyyy-MM-dd')}</TableCell>
+                    <TableCell>
+                      <Badge variant={getCouponStatus(coupon) === 'Active' ? 'default' : getCouponStatus(coupon) === 'Expired' ? 'destructive' : 'secondary'}>
+                        {getCouponStatus(coupon)}
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </CardContent>
         </Card>
       </div>
