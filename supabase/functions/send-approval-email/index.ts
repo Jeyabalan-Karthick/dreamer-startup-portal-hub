@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { Resend } from "npm:resend@2.0.0";
@@ -98,11 +97,13 @@ const handler = async (req: Request): Promise<Response> => {
     console.log('Approval tokens created successfully');
 
     // Send email to incubation center admin (not generic admin)
-    const approveUrl = `${Deno.env.get('SUPABASE_URL')}/functions/v1/handle-approval?token=${approveToken}`;
-    const rejectUrl = `${Deno.env.get('SUPABASE_URL')}/functions/v1/handle-approval?token=${rejectToken}`;
+    // Use frontend URL instead of direct Edge Function URL
+    const frontendUrl = Deno.env.get('FRONTEND_URL') || 'http://localhost:8080';
+    const approveUrl = `${frontendUrl}/approval?token=${approveToken}`;
+    const rejectUrl = `${frontendUrl}/reject?token=${rejectToken}`;
 
     const emailResponse = await resend.emails.send({
-      from: "Dreamers Incubation <noreply@resend.dev>",
+      from: "Dreamers Incubation <noreply@brandmindz.com>",
       to: [incubationCenter.admin_email],
       subject: `New Application for ${incubationCenter.name}`,
       html: `
@@ -214,3 +215,4 @@ const handler = async (req: Request): Promise<Response> => {
 };
 
 serve(handler);
+  
