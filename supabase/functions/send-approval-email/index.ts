@@ -98,7 +98,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send email to incubation center admin (not generic admin)
     // Use frontend URL instead of direct Edge Function URL
-    const frontendUrl = Deno.env.get('FRONTEND_URL') || 'https://dreamer-startup-portal-hub.vercel.app';
+    const frontendUrl = 'https://dreamer-startup-portal-hub.vercel.app';
     const approveUrl = `${frontendUrl}/approval?token=${approveToken}`;
     const rejectUrl = `${frontendUrl}/reject?token=${rejectToken}`;
 
