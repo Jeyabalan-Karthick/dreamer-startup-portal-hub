@@ -21,14 +21,12 @@ const StartupIdeaStep = ({ data, updateData, onPrev }: StartupIdeaStepProps) => 
   const [submitted, setSubmitted] = useState(false);
 
   const expectationOptions = [
-    'Funding Support',
-    'Mentorship',
-    'Office Space',
-    'Networking Opportunities',
-    'Legal Support',
-    'Marketing Support',
-    'Technical Support',
-    'Business Development'
+    'marketing stratergy',
+    'customer segmentations',
+    'unit economics',
+    'social media presence',
+    'company branding',
+    'perssonal bradning'
   ];
 
   const handleExpectationChange = (expectation: string, checked: boolean) => {
@@ -206,13 +204,14 @@ const StartupIdeaStep = ({ data, updateData, onPrev }: StartupIdeaStepProps) => 
           </div>
 
           <div>
-            <Label htmlFor="challenges">What challenges are you currently facing? (Optional)</Label>
+            <Label htmlFor="challenges">What challenges are you currently facing? *</Label>
             <Textarea
               id="challenges"
               placeholder="Tell us about any challenges you're facing in your startup journey..."
               value={data.challenges || ''}
               onChange={(e) => updateData({ challenges: e.target.value })}
               rows={3}
+              required
             />
           </div>
 
