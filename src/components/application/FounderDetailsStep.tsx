@@ -357,7 +357,38 @@ const FounderDetailsStep = ({ data, updateData, onNext }: FounderDetailsStepProp
             {couponStatus === 'valid' && (
               <p className="text-sm text-green-600 transition-all">{couponMessage}</p>
             )}
-            <p className="text-sm text-gray-500">This code is required to access the incubation program</p>
+            <div className="flex items-center space-x-2 mt-1">
+              <svg
+                className="w-4 h-4 text-blue-500 flex-shrink-0"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                viewBox="0 0 24 24"
+              >
+                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 16v-4m0-4h.01" />
+              </svg>
+              <span className="text-sm text-gray-500">
+                If you don't have a coupon code,&nbsp;
+                <a
+                  href="https://mail.google.com/mail/?view=cm&fs=1&to=brandmindzteam@gmail.com&su=Need%20Coupon%20Code%20for%20Application&body=Hi%20Team%2C%0A%0AI%20would%20like%20to%20request%20a%20coupon%20code%20for%20the%20incubation%20program.%0A%0ARegards%2C%0A"
+                  className="text-blue-600 underline"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={e => {
+                    // Add user's email to the body if available
+                    if (data.email) {
+                      const url = `https://mail.google.com/mail/?view=cm&fs=1&to=brandmindzteam@gmail.com&su=Need%20Coupon%20Code%20for%20Application&body=Hi%20Team%2C%0A%0AI%20would%20like%20to%20request%20a%20coupon%20code%20for%20the%20incubation%20program.%0A%0ARegards%2C%0A${encodeURIComponent(data.email)}`;
+                      window.open(url, '_blank', 'noopener,noreferrer');
+                      e.preventDefault();
+                    }
+                  }}
+                >
+                  contact us
+                </a>
+                .
+              </span>
+            </div>
           </div>
 
           <div className="flex justify-end">

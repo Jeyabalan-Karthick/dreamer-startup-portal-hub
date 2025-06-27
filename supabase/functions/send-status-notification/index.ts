@@ -191,9 +191,7 @@ const handler = async (req: Request): Promise<Response> => {
                     <p>You now have access to ₹40,000 worth of benefits including expert consultations, premium resources, and dedicated support.</p>
                     <p>Log in to your account to access all the amazing benefits waiting for you!</p>
                   </div>
-                  <a href="${SUPABASE_URL.replace('/v1', '') || 'http://localhost:3000'}/login" class="cta-button">
-                    Access Your Benefits →
-                  </a>
+                  
                 ` : `
                   <div class="message">
                     <p>We regret to inform you that your startup application was not approved by ${application.incubation_centre} at this time.</p>
