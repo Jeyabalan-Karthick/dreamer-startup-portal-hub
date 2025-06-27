@@ -146,6 +146,62 @@ export type Database = {
         }
         Relationships: []
       }
+      coupon_codes: {
+        Row: {
+          id: string
+          code: string
+          max_uses: number
+          expires_at: string
+          is_active: boolean | null
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          code: string
+          max_uses: number
+          expires_at: string
+          is_active?: boolean | null
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          code?: string
+          max_uses?: number
+          expires_at?: string
+          is_active?: boolean | null
+          created_at?: string | null
+        }
+        Relationships: []
+      }
+      coupon_code_usages: {
+        Row: {
+          id: string
+          coupon_code_id: string
+          used_by_email: string
+          used_at: string | null
+        }
+        Insert: {
+          id?: string
+          coupon_code_id: string
+          used_by_email: string
+          used_at?: string | null
+        }
+        Update: {
+          id?: string
+          coupon_code_id?: string
+          used_by_email?: string
+          used_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coupon_code_usages_coupon_code_id_fkey"
+            columns: ["coupon_code_id"]
+            isOneToOne: false
+            referencedRelation: "coupon_codes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

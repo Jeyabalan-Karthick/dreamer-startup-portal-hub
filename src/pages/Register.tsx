@@ -1,12 +1,13 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { CouponInput } from "@/components/ui/coupon-input";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { recordCouponUsage } from "@/lib/coupon-utils";
 
 const Register = () => {
   const [searchParams] = useSearchParams();
@@ -18,6 +19,7 @@ const Register = () => {
     couponCode: searchParams.get('code') || ''
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [isCouponValid, setIsCouponValid] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,6 +37,15 @@ const Register = () => {
       toast({
         title: "Error",
         description: "Coupon code is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!isCouponValid) {
+      toast({
+        title: "Error",
+        description: "Please enter a valid coupon code",
         variant: "destructive",
       });
       return;
@@ -69,6 +80,14 @@ const Register = () => {
 
       console.log('Registration successful:', data);
       
+      // Record coupon usage
+      const usageResult = await recordCouponUsage(formData.couponCode, formData.email);
+      if (!usageResult.success) {
+        console.error('Failed to record coupon usage:', usageResult.error);
+        // Don't fail registration if coupon usage recording fails
+        // Just log it for debugging
+      }
+      
       if (data.user && !data.user.email_confirmed_at) {
         toast({
           title: "Registration Successful",
@@ -97,6 +116,13 @@ const Register = () => {
     setFormData(prev => ({
       ...prev,
       [e.target.name]: e.target.value
+    }));
+  };
+
+  const handleCouponChange = (value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      couponCode: value
     }));
   };
 
@@ -154,25 +180,19 @@ const Register = () => {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="couponCode" className="text-gray-700">Coupon Code *</Label>
-                <Input
-                  id="couponCode"
-                  name="couponCode"
-                  type="text"
-                  required
-                  value={formData.couponCode}
-                  onChange={handleInputChange}
-                  className="border-gray-300 focus:border-gray-500"
-                  placeholder="Enter coupon code"
-                />
-                <p className="text-sm text-gray-500">Required to access the incubation program</p>
-              </div>
+              <CouponInput
+                value={formData.couponCode}
+                onChange={handleCouponChange}
+                onValidationChange={setIsCouponValid}
+                label="Coupon Code"
+                placeholder="Enter coupon code"
+                required={true}
+              />
 
               <Button 
                 type="submit" 
                 className="w-full bg-gray-900 hover:bg-gray-800 text-white"
-                disabled={isLoading}
+                disabled={isLoading || !isCouponValid}
               >
                 {isLoading ? 'Creating Account...' : 'Create Account'}
               </Button>

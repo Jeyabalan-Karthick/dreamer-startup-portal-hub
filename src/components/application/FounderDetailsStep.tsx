@@ -153,14 +153,26 @@ const FounderDetailsStep = ({ data, updateData, onNext }: FounderDetailsStepProp
       .from('coupon_code_usages')
       .insert({
         coupon_code_id: couponId,
-        used_by: data.email,
+        used_by_email: data.email,
       });
+
     if (usageInsertError) {
-      toast({
-        title: 'Coupon Error',
-        description: 'Failed to record coupon usage. Please try again.',
-        variant: 'destructive',
-      });
+      if (
+        usageInsertError.code === '23505' ||
+        usageInsertError.message?.includes('duplicate key value')
+      ) {
+        toast({
+          title: 'Coupon Already Used',
+          description: 'You have already used this coupon code with this email.',
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'Coupon Error',
+          description: 'Failed to record coupon usage. Please try again.',
+          variant: 'destructive',
+        });
+      }
       return;
     }
 

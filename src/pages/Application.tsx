@@ -8,6 +8,7 @@ import IncubationInfoStep from '../components/application/IncubationInfoStep';
 import StartupIdeaStep from '../components/application/StartupIdeaStep';
 import ApplicationSuccess from '../components/application/ApplicationSuccess';
 import CongratulationsModal from '../components/CongratulationsModal';
+import { Badge } from "@/components/ui/badge";
 
 const Application = () => {
   const [loading, setLoading] = useState(true);
