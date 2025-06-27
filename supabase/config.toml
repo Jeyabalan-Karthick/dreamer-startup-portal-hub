@@ -10,7 +10,7 @@ max_rows = 1000
 [auth]
 enabled = true
 site_url = "https://dreamer-startup-portal-hub.vercel.app/"
-additional_redirect_urls = ["https://dreamer-startup-portal-hub.vercel.app"]
+additional_redirect_urls = ["https://dreamer-startup-portal-hub.vercel.app/"]
 jwt_expiry = 3600
 enable_signup = true
 enable_manual_linking = false
