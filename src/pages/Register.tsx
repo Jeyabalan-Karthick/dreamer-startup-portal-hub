@@ -1,25 +1,20 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CouponInput } from "@/components/ui/coupon-input";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { recordCouponUsage } from "@/lib/coupon-utils";
 
 const Register = () => {
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    confirmPassword: '',
-    couponCode: searchParams.get('code') || ''
+    confirmPassword: ''
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [isCouponValid, setIsCouponValid] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,26 +28,8 @@ const Register = () => {
       return;
     }
 
-    if (!formData.couponCode) {
-      toast({
-        title: "Error",
-        description: "Coupon code is required",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!isCouponValid) {
-      toast({
-        title: "Error",
-        description: "Please enter a valid coupon code",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsLoading(true);
-    console.log('Registration attempt:', { email: formData.email, couponCode: formData.couponCode });
+    console.log('Registration attempt:', { email: formData.email });
     
     try {
       const redirectUrl = "https://dreamer-startup-portal-hub.vercel.app/application";
@@ -61,10 +38,7 @@ const Register = () => {
         email: formData.email,
         password: formData.password,
         options: {
-          emailRedirectTo: redirectUrl,
-          data: {
-            coupon_code: formData.couponCode
-          }
+          emailRedirectTo: redirectUrl
         }
       });
 
@@ -79,14 +53,6 @@ const Register = () => {
       }
 
       console.log('Registration successful:', data);
-      
-      // Record coupon usage
-      const usageResult = await recordCouponUsage(formData.couponCode, formData.email);
-      if (!usageResult.success) {
-        console.error('Failed to record coupon usage:', usageResult.error);
-        // Don't fail registration if coupon usage recording fails
-        // Just log it for debugging
-      }
       
       if (data.user && !data.user.email_confirmed_at) {
         toast({
@@ -116,13 +82,6 @@ const Register = () => {
     setFormData(prev => ({
       ...prev,
       [e.target.name]: e.target.value
-    }));
-  };
-
-  const handleCouponChange = (value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      couponCode: value
     }));
   };
 
@@ -180,19 +139,10 @@ const Register = () => {
                 />
               </div>
 
-              <CouponInput
-                value={formData.couponCode}
-                onChange={handleCouponChange}
-                onValidationChange={setIsCouponValid}
-                label="Coupon Code"
-                placeholder="Enter coupon code"
-                required={true}
-              />
-
               <Button 
                 type="submit" 
                 className="w-full bg-gray-900 hover:bg-gray-800 text-white"
-                disabled={isLoading || !isCouponValid}
+                disabled={isLoading}
               >
                 {isLoading ? 'Creating Account...' : 'Create Account'}
               </Button>
