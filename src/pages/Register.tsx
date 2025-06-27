@@ -55,7 +55,7 @@ const Register = () => {
     console.log('Registration attempt:', { email: formData.email, couponCode: formData.couponCode });
     
     try {
-      const redirectUrl = `${window.location.origin}/application`;
+      const redirectUrl = "https://dreamer-startup-portal-hub.vercel.app/application";
       
       const { data, error } = await supabase.auth.signUp({
         email: formData.email,
