@@ -4,24 +4,131 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
+import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { CheckCircle2, XCircle } from 'lucide-react';
+
+interface FounderDetailsData {
+  founderName: string;
+  startupName: string;
+  email: string;
+  phone: string;
+  companyType: string;
+  companyTypeOther?: string;
+  teamSize: string;
+  source: string;
+  sourceOther?: string;
+  couponCode: string;
+}
 
 interface FounderDetailsStepProps {
-  data: any;
-  updateData: (data: any) => void;
+  data: FounderDetailsData;
+  updateData: (data: Partial<FounderDetailsData>) => void;
   onNext: () => void;
 }
 
 const FounderDetailsStep = ({ data, updateData, onNext }: FounderDetailsStepProps) => {
+  const [showCompanyTypeOther, setShowCompanyTypeOther] = useState(data.companyType === 'Others');
+  const [showSourceOther, setShowSourceOther] = useState(data.source === 'Other');
+  const [companyTypeOther, setCompanyTypeOther] = useState(data.companyTypeOther || '');
+  const [sourceOther, setSourceOther] = useState(data.sourceOther || '');
+  const [couponStatus, setCouponStatus] = useState<'idle' | 'valid' | 'invalid' | 'checking'>('idle');
+  const [couponMessage, setCouponMessage] = useState('');
+  const [couponId, setCouponId] = useState<string | null>(null);
+
   const handleInputChange = (field: string, value: string) => {
     updateData({ [field]: value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleCompanyTypeChange = (value: string) => {
+    handleInputChange('companyType', value);
+    setShowCompanyTypeOther(value === 'Others');
+    if (value !== 'Others') {
+      setCompanyTypeOther('');
+      updateData({ companyTypeOther: '' });
+    }
+  };
+
+  const handleSourceChange = (value: string) => {
+    handleInputChange('source', value);
+    setShowSourceOther(value === 'Other');
+    if (value !== 'Other') {
+      setSourceOther('');
+      updateData({ sourceOther: '' });
+    }
+  };
+
+  const handleCompanyTypeOtherChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCompanyTypeOther(e.target.value);
+    updateData({ companyTypeOther: e.target.value });
+  };
+
+  const handleSourceOtherChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSourceOther(e.target.value);
+    updateData({ sourceOther: e.target.value });
+  };
+
+  const validateCoupon = async (code: string) => {
+    setCouponStatus('checking');
+    setCouponMessage('');
+    if (!code) {
+      setCouponStatus('idle');
+      setCouponId(null);
+      return;
+    }
+    // 1. Find the coupon
+    const { data: coupon, error } = await supabase
+      .from('coupon_codes')
+      .select('*')
+      .eq('code', code)
+      .single();
+    if (error || !coupon) {
+      setCouponStatus('invalid');
+      setCouponMessage('Invalid coupon code');
+      setCouponId(null);
+      return;
+    }
+    // 2. Check expiry
+    const now = new Date();
+    if (new Date(coupon.expires_at) < now) {
+      setCouponStatus('invalid');
+      setCouponMessage('Coupon expired');
+      setCouponId(null);
+      return;
+    }
+    // 3. Count usages
+    const { count, error: usageError } = await supabase
+      .from('coupon_code_usages')
+      .select('*', { count: 'exact', head: true })
+      .eq('coupon_code_id', coupon.id);
+    if (usageError) {
+      setCouponStatus('invalid');
+      setCouponMessage('Error checking coupon usage');
+      setCouponId(null);
+      return;
+    }
+    if (count >= coupon.max_uses) {
+      setCouponStatus('invalid');
+      setCouponMessage('Coupon usage limit reached');
+      setCouponId(null);
+      return;
+    }
+    setCouponStatus('valid');
+    setCouponMessage('Coupon valid!');
+    setCouponId(coupon.id);
+  };
+
+  const handleCouponChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    handleInputChange('couponCode', e.target.value);
+    validateCoupon(e.target.value);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validation
     const requiredFields = ['founderName', 'startupName', 'email', 'phone', 'companyType', 'teamSize', 'source', 'couponCode'];
-    const missingFields = requiredFields.filter(field => !data[field]);
+    const missingFields = requiredFields.filter(field => !data[field] || (data[field] === 'Others' && !companyTypeOther) || (data[field] === 'Other' && !sourceOther));
     
     if (missingFields.length > 0) {
       toast({
@@ -32,7 +139,51 @@ const FounderDetailsStep = ({ data, updateData, onNext }: FounderDetailsStepProp
       return;
     }
 
-    console.log('Step 1 data:', data);
+    if (couponStatus !== 'valid' || !couponId) {
+      toast({
+        title: 'Invalid Coupon',
+        description: couponMessage || 'Please enter a valid coupon code',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Insert coupon usage
+    const { error: usageInsertError } = await supabase
+      .from('coupon_code_usages')
+      .insert({
+        coupon_code_id: couponId,
+        used_by_email: data.email,
+      });
+
+    if (usageInsertError) {
+      if (
+        usageInsertError.code === '23505' ||
+        usageInsertError.message?.includes('duplicate key value')
+      ) {
+        toast({
+          title: 'Coupon Already Used',
+          description: 'You have already used this coupon code with this email.',
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'Coupon Error',
+          description: 'Failed to record coupon usage. Please try again.',
+          variant: 'destructive',
+        });
+      }
+      return;
+    }
+
+    // If 'Others' is selected, use the custom value
+    const submitData = {
+      ...data,
+      companyType: data.companyType === 'Others' ? companyTypeOther : data.companyType,
+      source: data.source === 'Other' ? sourceOther : data.source,
+    };
+    console.log('Step 1 data:', submitData);
+    updateData(submitData); // update parent with resolved values
     onNext();
   };
 
@@ -100,7 +251,7 @@ const FounderDetailsStep = ({ data, updateData, onNext }: FounderDetailsStepProp
           <div className="grid md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label className="text-gray-700">Company Type *</Label>
-              <Select value={data.companyType || ''} onValueChange={(value) => handleInputChange('companyType', value)}>
+              <Select value={data.companyType || ''} onValueChange={handleCompanyTypeChange}>
                 <SelectTrigger className="border-gray-300">
                   <SelectValue placeholder="Select type" />
                 </SelectTrigger>
@@ -110,6 +261,22 @@ const FounderDetailsStep = ({ data, updateData, onNext }: FounderDetailsStepProp
                   <SelectItem value="Others">Others</SelectItem>
                 </SelectContent>
               </Select>
+              {/* Animated input for Others */}
+              <div style={{
+                maxHeight: showCompanyTypeOther ? 60 : 0,
+                overflow: 'hidden',
+                transition: 'max-height 0.3s ease',
+              }}>
+                {showCompanyTypeOther && (
+                  <Input
+                    className="mt-2 border-gray-300"
+                    placeholder="Please specify company type"
+                    value={companyTypeOther}
+                    onChange={handleCompanyTypeOtherChange}
+                    required={showCompanyTypeOther}
+                  />
+                )}
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -129,7 +296,7 @@ const FounderDetailsStep = ({ data, updateData, onNext }: FounderDetailsStepProp
 
             <div className="space-y-2">
               <Label className="text-gray-700">How did you hear about us? *</Label>
-              <Select value={data.source || ''} onValueChange={(value) => handleInputChange('source', value)}>
+              <Select value={data.source || ''} onValueChange={handleSourceChange}>
                 <SelectTrigger className="border-gray-300">
                   <SelectValue placeholder="Select source" />
                 </SelectTrigger>
@@ -141,19 +308,55 @@ const FounderDetailsStep = ({ data, updateData, onNext }: FounderDetailsStepProp
                   <SelectItem value="Other">Other</SelectItem>
                 </SelectContent>
               </Select>
+              {/* Animated input for Other */}
+              <div style={{
+                maxHeight: showSourceOther ? 60 : 0,
+                overflow: 'hidden',
+                transition: 'max-height 0.3s ease',
+              }}>
+                {showSourceOther && (
+                  <Input
+                    className="mt-2 border-gray-300"
+                    placeholder="Please specify how you heard about us"
+                    value={sourceOther}
+                    onChange={handleSourceOtherChange}
+                    required={showSourceOther}
+                  />
+                )}
+              </div>
             </div>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="couponCode" className="text-gray-700">Coupon Code *</Label>
-            <Input
-              id="couponCode"
-              value={data.couponCode || ''}
-              onChange={(e) => handleInputChange('couponCode', e.target.value)}
-              className="border-gray-300"
-              placeholder="Enter your coupon code"
-              required
-            />
+            <div className="relative">
+              <Input
+                id="couponCode"
+                value={data.couponCode || ''}
+                onChange={handleCouponChange}
+                className="border-gray-300 pr-10"
+                placeholder="Enter your coupon code"
+                required
+              />
+              {/* Animated status icon */}
+              <span className="absolute right-2 top-1/2 -translate-y-1/2 transition-all">
+                {couponStatus === 'checking' && (
+                  <svg className="animate-spin h-5 w-5 text-gray-400" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /></svg>
+                )}
+                {couponStatus === 'valid' && (
+                  <CheckCircle2 className="text-green-500 animate-bounce" />
+                )}
+                {couponStatus === 'invalid' && (
+                  <XCircle className="text-red-500 animate-shake" />
+                )}
+              </span>
+            </div>
+            {couponStatus === 'invalid' && (
+              <p className="text-sm text-red-500 transition-all">{couponMessage}</p>
+            )}
+            {couponStatus === 'valid' && (
+              <p className="text-sm text-green-600 transition-all">{couponMessage}</p>
+            )}
             <p className="text-sm text-gray-500">This code is required to access the incubation program</p>
           </div>
 

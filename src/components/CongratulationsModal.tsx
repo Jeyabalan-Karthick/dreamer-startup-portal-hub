@@ -180,7 +180,7 @@ const CongratulationsModal = ({ isOpen, onClose, applicationData }: Congratulati
               <div className="grid md:grid-cols-3 gap-4 text-sm text-blue-700">
                 <div className="flex items-center space-x-2 p-3 bg-blue-50 rounded-lg">
                   <Mail className="w-4 h-4" />
-                  <span>support@dreamersincubation.com</span>
+                  <span>brandmindzteam@gmail.com</span>
                 </div>
                 <div className="flex items-center space-x-2 p-3 bg-blue-50 rounded-lg">
                   <Phone className="w-4 h-4" />

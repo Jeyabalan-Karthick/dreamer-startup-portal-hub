@@ -205,7 +205,7 @@ const handler = async (req: Request): Promise<Response> => {
                     </ul>
                     <p>Don't give up on your dreams!</p>
                   </div>
-                  <a href="mailto:support@dreamersincubation.com" class="cta-button">
+                  <a href="mailto:brandmindzteam@gmail.com" class="cta-button">
                     Contact Support
                   </a>
                 `}
