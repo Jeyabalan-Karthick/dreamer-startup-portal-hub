@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from 'date-fns';
+import { Trash2, Users, CheckCircle, XCircle, Clock } from 'lucide-react';
 
 interface Application {
   id: string;
@@ -66,6 +67,7 @@ const Admin = () => {
     is_active: true
   });
   const [couponLoading, setCouponLoading] = useState(true);
+  const [selectedIncubationCentre, setSelectedIncubationCentre] = useState<string>('all');
 
   useEffect(() => {
     fetchApplications();
@@ -271,6 +273,56 @@ const Admin = () => {
     }
   };
 
+  const deleteCouponCode = async (couponId: string) => {
+    if (!confirm('Are you sure you want to delete this coupon code? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      // First delete all usages of this coupon
+      const { error: usageError } = await supabase
+        .from('coupon_code_usages')
+        .delete()
+        .eq('coupon_code_id', couponId);
+
+      if (usageError) {
+        console.error('Error deleting coupon usages:', usageError);
+        toast({
+          title: "Error",
+          description: "Failed to delete coupon usages",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Then delete the coupon code
+      const { error } = await supabase
+        .from('coupon_codes')
+        .delete()
+        .eq('id', couponId);
+
+      if (error) {
+        console.error('Error deleting coupon code:', error);
+        toast({
+          title: "Error",
+          description: "Failed to delete coupon code",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      toast({
+        title: "Success",
+        description: "Coupon code deleted successfully",
+      });
+
+      fetchCouponCodes();
+      fetchCouponUsages();
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
       case 'approved':
@@ -285,24 +337,42 @@ const Admin = () => {
   };
 
   const getFilteredApplications = () => {
+    let filtered = applications;
+    
+    // Filter by status
     switch (activeTab) {
       case 'pending':
-        return applications.filter(app => app.status === 'pending');
+        filtered = filtered.filter(app => app.status === 'pending');
+        break;
       case 'approved':
-        return applications.filter(app => app.status === 'approved');
+        filtered = filtered.filter(app => app.status === 'approved');
+        break;
       case 'rejected':
-        return applications.filter(app => app.status === 'rejected');
+        filtered = filtered.filter(app => app.status === 'rejected');
+        break;
       default:
-        return applications;
+        // 'all' - no status filter
+        break;
     }
+    
+    // Filter by incubation centre
+    if (selectedIncubationCentre !== 'all') {
+      filtered = filtered.filter(app => app.incubation_centre === selectedIncubationCentre);
+    }
+    
+    return filtered;
   };
 
   const getStatusCounts = () => {
+    const filteredByCentre = selectedIncubationCentre !== 'all' 
+      ? applications.filter(app => app.incubation_centre === selectedIncubationCentre)
+      : applications;
+      
     return {
-      all: applications.length,
-      pending: applications.filter(app => app.status === 'pending').length,
-      approved: applications.filter(app => app.status === 'approved').length,
-      rejected: applications.filter(app => app.status === 'rejected').length,
+      all: filteredByCentre.length,
+      pending: filteredByCentre.filter(app => app.status === 'pending').length,
+      approved: filteredByCentre.filter(app => app.status === 'approved').length,
+      rejected: filteredByCentre.filter(app => app.status === 'rejected').length,
     };
   };
 
@@ -344,6 +414,65 @@ const Admin = () => {
           <p className="text-gray-600">View startup applications and manage incubation centers</p>
         </div>
 
+        {/* Statistics Tiles */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-blue-100 rounded-full">
+                  <Users className="h-6 w-6 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Total Applicants</p>
+                  <p className="text-2xl font-bold text-gray-900">{statusCounts.all}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-yellow-100 rounded-full">
+                  <Clock className="h-6 w-6 text-yellow-600" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Pending</p>
+                  <p className="text-2xl font-bold text-gray-900">{statusCounts.pending}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-green-100 rounded-full">
+                  <CheckCircle className="h-6 w-6 text-green-600" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Approved</p>
+                  <p className="text-2xl font-bold text-gray-900">{statusCounts.approved}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-red-100 rounded-full">
+                  <XCircle className="h-6 w-6 text-red-600" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Rejected</p>
+                  <p className="text-2xl font-bold text-gray-900">{statusCounts.rejected}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Add New Incubation Centre */}
         <Card className="mb-8">
           <CardHeader>
@@ -383,11 +512,36 @@ const Admin = () => {
           <CardContent>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {incubationCentres.map((centre) => (
-                <div key={centre.id} className="border rounded-lg p-4">
+                <div 
+                  key={centre.id} 
+                  className={`border rounded-lg p-4 cursor-pointer transition-colors ${
+                    selectedIncubationCentre === centre.name 
+                      ? 'border-blue-500 bg-blue-50' 
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                  onClick={() => setSelectedIncubationCentre(centre.name)}
+                >
                   <h3 className="font-semibold text-gray-900">{centre.name}</h3>
                   <p className="text-sm text-gray-600">{centre.admin_email}</p>
+                  {selectedIncubationCentre === centre.name && (
+                    <p className="text-xs text-blue-600 mt-1">✓ Selected</p>
+                  )}
                 </div>
               ))}
+              <div 
+                className={`border rounded-lg p-4 cursor-pointer transition-colors ${
+                  selectedIncubationCentre === 'all' 
+                    ? 'border-blue-500 bg-blue-50' 
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+                onClick={() => setSelectedIncubationCentre('all')}
+              >
+                <h3 className="font-semibold text-gray-900">All Centres</h3>
+                <p className="text-sm text-gray-600">View all applications</p>
+                {selectedIncubationCentre === 'all' && (
+                  <p className="text-xs text-blue-600 mt-1">✓ Selected</p>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -474,13 +628,22 @@ const Admin = () => {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => toggleCouponStatus(coupon.id, coupon.is_active)}
-                        >
-                          {coupon.is_active ? 'Deactivate' : 'Activate'}
-                        </Button>
+                        <div className="flex space-x-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => toggleCouponStatus(coupon.id, coupon.is_active)}
+                          >
+                            {coupon.is_active ? 'Deactivate' : 'Activate'}
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => deleteCouponCode(coupon.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -500,7 +663,14 @@ const Admin = () => {
         <Card>
           <CardHeader>
             <CardTitle>Applications Overview</CardTitle>
-            <p className="text-sm text-gray-600">View-only dashboard for application status monitoring</p>
+            <p className="text-sm text-gray-600">
+              View-only dashboard for application status monitoring
+              {selectedIncubationCentre !== 'all' && (
+                <span className="ml-2 text-blue-600">
+                  • Filtered by: {selectedIncubationCentre}
+                </span>
+              )}
+            </p>
           </CardHeader>
           <CardContent>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">

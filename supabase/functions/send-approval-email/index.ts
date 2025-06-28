@@ -149,6 +149,30 @@ const handler = async (req: Request): Promise<Response> => {
             </table>
           </div>
 
+          ${application.registration_certificate_url ? `
+          <div style="background-color: white; border: 1px solid #e9ecef; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+            <h3 style="color: #333; margin-top: 0;">📄 Registration Certificate:</h3>
+            <p style="color: #333; margin-bottom: 10px;">The applicant has uploaded their company registration certificate.</p>
+            <a href="${application.registration_certificate_url}" 
+               target="_blank"
+               style="background-color: #007bff; color: white; padding: 8px 16px; text-decoration: none; border-radius: 4px; display: inline-block; font-weight: 500;">
+              📋 View Registration Certificate
+            </a>
+          </div>
+          ` : ''}
+
+          ${application.incubation_letter_url ? `
+          <div style="background-color: white; border: 1px solid #e9ecef; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+            <h3 style="color: #333; margin-top: 0;">📋 Incubation Letter:</h3>
+            <p style="color: #333; margin-bottom: 10px;">The applicant has uploaded their incubation letter.</p>
+            <a href="${application.incubation_letter_url}" 
+               target="_blank"
+               style="background-color: #28a745; color: white; padding: 8px 16px; text-decoration: none; border-radius: 4px; display: inline-block; font-weight: 500;">
+              📄 View Incubation Letter
+            </a>
+          </div>
+          ` : ''}
+
           <div style="background-color: white; border: 1px solid #e9ecef; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
             <h3 style="color: #333; margin-top: 0;">Startup Idea:</h3>
             <p style="color: #333; line-height: 1.6; margin: 0;">${application.idea_description}</p>

@@ -88,7 +88,16 @@ const FounderDetailsStep = ({ data, updateData, onNext }: FounderDetailsStepProp
       setCouponId(null);
       return;
     }
-    // 2. Check expiry
+    
+    // 2. Check if coupon is active
+    if (!coupon.is_active) {
+      setCouponStatus('invalid');
+      setCouponMessage('This coupon code is inactive');
+      setCouponId(null);
+      return;
+    }
+    
+    // 3. Check expiry
     const now = new Date();
     if (new Date(coupon.expires_at) < now) {
       setCouponStatus('invalid');
@@ -96,7 +105,7 @@ const FounderDetailsStep = ({ data, updateData, onNext }: FounderDetailsStepProp
       setCouponId(null);
       return;
     }
-    // 3. Count usages
+    // 4. Count usages
     const { count, error: usageError } = await supabase
       .from('coupon_code_usages')
       .select('*', { count: 'exact', head: true })
