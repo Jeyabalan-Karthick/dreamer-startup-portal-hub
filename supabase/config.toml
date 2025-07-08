@@ -23,3 +23,4 @@ verify_jwt = true
 
 [functions.send-status-notification]
 verify_jwt = false
+  

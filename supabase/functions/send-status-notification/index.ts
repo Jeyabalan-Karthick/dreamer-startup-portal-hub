@@ -192,6 +192,10 @@ const handler = async (req: Request): Promise<Response> => {
                     <p>Log in to your account to access all the amazing benefits waiting for you!</p>
                   </div>
                   
+                  <a href="https://dreamer-startup-portal-hub.vercel.app/login" class="cta-button">
+                    🚀 Login to Access Benefits
+                  </a>
+                  
                 ` : `
                   <div class="message">
                     <p>We regret to inform you that your startup application was not approved by ${application.incubation_centre} at this time.</p>

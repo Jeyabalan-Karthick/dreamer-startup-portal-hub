@@ -155,8 +155,9 @@ const handler = async (req: Request): Promise<Response> => {
             <p style="color: #333; margin-bottom: 10px;">The applicant has uploaded their company registration certificate.</p>
             <a href="${application.registration_certificate_url}" 
                target="_blank"
+               download
                style="background-color: #007bff; color: white; padding: 8px 16px; text-decoration: none; border-radius: 4px; display: inline-block; font-weight: 500;">
-              📋 View Registration Certificate
+              📥 Download Registration Certificate
             </a>
           </div>
           ` : ''}
@@ -167,8 +168,9 @@ const handler = async (req: Request): Promise<Response> => {
             <p style="color: #333; margin-bottom: 10px;">The applicant has uploaded their incubation letter.</p>
             <a href="${application.incubation_letter_url}" 
                target="_blank"
+               download
                style="background-color: #28a745; color: white; padding: 8px 16px; text-decoration: none; border-radius: 4px; display: inline-block; font-weight: 500;">
-              📄 View Incubation Letter
+              📥 Download Incubation Letter
             </a>
           </div>
           ` : ''}
