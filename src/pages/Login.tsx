@@ -1,10 +1,11 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -12,12 +13,65 @@ const Login = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
-    password: ''
+    password: '',
+    rememberMe: false
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [showHint, setShowHint] = useState(false);
+  const [passwordHint, setPasswordHint] = useState('');
+
+  // Load saved data on component mount
+  useEffect(() => {
+    const savedEmail = localStorage.getItem('remembered_email');
+    const savedHint = localStorage.getItem('password_hint');
+    if (savedEmail && savedHint) {
+      setFormData(prev => ({
+        ...prev,
+        email: savedEmail,
+        rememberMe: true
+      }));
+      setPasswordHint(savedHint);
+    }
+  }, []);
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[a-z0-9._%+-]+@gmail\.com$/;
+    return emailRegex.test(email);
+  };
+
+  const validatePassword = (password: string) => {
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumber = /\d/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+    const isLengthValid = password.length >= 8;
+
+    return hasUpperCase && hasLowerCase && hasNumber && hasSpecialChar && isLengthValid;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Email validation
+    if (!validateEmail(formData.email)) {
+      toast({
+        title: "Invalid Email",
+        description: "Please enter a valid Gmail address (lowercase letters only).",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Password validation
+    if (!validatePassword(formData.password)) {
+      toast({
+        title: "Invalid Password",
+        description: "Password must contain at least 8 characters with uppercase, lowercase, number, and special character.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
     
     console.log('Login attempt:', { email: formData.email });
@@ -36,6 +90,15 @@ const Login = () => {
           variant: "destructive",
         });
         return;
+      }
+
+      // Save remember me data
+      if (formData.rememberMe) {
+        localStorage.setItem('remembered_email', formData.email);
+        // Note: We don't save password hint here since it's only stored during registration
+      } else {
+        localStorage.removeItem('remembered_email');
+        localStorage.removeItem('password_hint');
       }
 
       console.log('Login successful:', data);
@@ -63,6 +126,10 @@ const Login = () => {
       ...prev,
       [e.target.name]: e.target.value
     }));
+  };
+
+  const toggleHint = () => {
+    setShowHint(!showHint);
   };
 
   return (
@@ -146,13 +213,25 @@ const Login = () => {
                       value={formData.email}
                       onChange={handleInputChange}
                       className="h-12 border-gray-300 focus:border-gray-900 bg-white font-syne relative"
-                      placeholder="Enter your email"
+                      placeholder="Enter your Gmail address"
                     />
                   </div>
+                  <p className="text-xs text-gray-500">Must be a valid Gmail address (lowercase letters only)</p>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="text-gray-800 font-medium font-syne">Password*</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="password" className="text-gray-800 font-medium font-syne">Password*</Label>
+                    {passwordHint && (
+                      <button
+                        type="button"
+                        onClick={toggleHint}
+                        className="text-xs text-blue-600 hover:underline font-syne"
+                      >
+                        {showHint ? 'Hide Hint' : 'Show Hint'}
+                      </button>
+                    )}
+                  </div>
                   <div className="relative overflow-hidden rounded-md">
                     <Input
                       id="password"
@@ -162,10 +241,34 @@ const Login = () => {
                       value={formData.password}
                       onChange={handleInputChange}
                       className="h-12 border-gray-300 focus:border-gray-900 bg-white font-syne relative"
-                      placeholder="Create a password"
+                      placeholder="Enter your password"
                       showPasswordToggle
                     />
                   </div>
+                  
+                  {/* Password Hint Display */}
+                  {showHint && passwordHint && (
+                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
+                      <p className="text-sm text-blue-800">
+                        <span className="font-medium">Password Hint:</span> {passwordHint}
+                      </p>
+                    </div>
+                  )}
+                  
+                  <p className="text-xs text-gray-500">
+                    Must contain: 8+ characters, uppercase, lowercase, number, and special character
+                  </p>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="rememberMe"
+                    checked={formData.rememberMe}
+                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, rememberMe: checked as boolean }))}
+                  />
+                  <Label htmlFor="rememberMe" className="text-sm text-gray-700 font-syne">
+                    Remember my email
+                  </Label>
                 </div>
 
                 <Button 
