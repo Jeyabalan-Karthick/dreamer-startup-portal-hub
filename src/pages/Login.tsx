@@ -24,6 +24,8 @@ const Login = () => {
   const [showHint, setShowHint] = useState(false);
   const [passwordHint, setPasswordHint] = useState('');
   const [emailError, setEmailError] = useState('');
+  const [passwordAttempts, setPasswordAttempts] = useState(0);
+  const [showPasswordHint, setShowPasswordHint] = useState(false);
 
   useEffect(() => {
     // Load remembered email if available
@@ -61,9 +63,31 @@ const Login = () => {
 
       if (error) {
         console.error('Login error:', error);
+        
+        // Increment password attempts for wrong password
+        if (error.message.includes('Invalid login credentials') || error.message.includes('password')) {
+          setPasswordAttempts(prev => {
+            const newAttempts = prev + 1;
+            if (newAttempts >= 2) {
+              setShowPasswordHint(true);
+            }
+            return newAttempts;
+          });
+        }
+        
+        // Specific error messages
+        let errorMessage = error.message;
+        if (error.message.includes('Invalid login credentials')) {
+          errorMessage = 'Incorrect password. Please try again.';
+        } else if (error.message.includes('Email not confirmed')) {
+          errorMessage = 'Please verify your email address before logging in.';
+        } else if (error.message.includes('User not found')) {
+          errorMessage = 'Email address not registered. Please sign up first.';
+        }
+        
         toast({
           title: "Login Failed",
-          description: error.message,
+          description: errorMessage,
           variant: "destructive",
         });
         return;
@@ -104,9 +128,13 @@ const Login = () => {
       [name]: value
     }));
 
-    // Clear email error when user starts typing
-    if (name === 'email' && emailError) {
-      setEmailError('');
+    // Real-time email validation
+    if (name === 'email') {
+      if (value.length > 0 && !validateEmail(value)) {
+        setEmailError('Please enter a valid email address (lowercase, @gmail.com format)');
+      } else {
+        setEmailError('');
+      }
     }
   };
 
@@ -224,33 +252,35 @@ const Login = () => {
                     </button>
                   </div>
 
-                  {/* Password Hint Section */}
-                  <div className="mt-2">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="showHint"
-                        checked={showHint}
-                        onCheckedChange={(checked) => setShowHint(checked as boolean)}
-                      />
-                      <Label htmlFor="showHint" className="text-sm text-gray-600 dark:text-gray-400 font-syne flex items-center">
-                        <HelpCircle className="h-4 w-4 mr-1" />
-                        Show password hint
-                      </Label>
-                    </div>
-                    {showHint && (
-                      <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
-                        {passwordHint ? (
-                          <p className="text-sm text-blue-800 dark:text-blue-200 font-syne">
-                            <strong>Hint:</strong> {passwordHint}
-                          </p>
-                        ) : (
-                          <p className="text-sm text-gray-600 dark:text-gray-400 font-syne">
-                            No password hint available. You can set one during registration.
-                          </p>
-                        )}
+                  {/* Password Hint Section - Show after 2 failed attempts */}
+                  {showPasswordHint && (
+                    <div className="mt-2">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="showHint"
+                          checked={showHint}
+                          onCheckedChange={(checked) => setShowHint(checked as boolean)}
+                        />
+                        <Label htmlFor="showHint" className="text-sm text-gray-600 dark:text-gray-400 font-syne flex items-center">
+                          <HelpCircle className="h-4 w-4 mr-1" />
+                          Show password hint
+                        </Label>
                       </div>
-                    )}
-                  </div>
+                      {showHint && (
+                        <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
+                          {passwordHint ? (
+                            <p className="text-sm text-blue-800 dark:text-blue-200 font-syne">
+                              <strong>Hint:</strong> {passwordHint}
+                            </p>
+                          ) : (
+                            <p className="text-sm text-gray-600 dark:text-gray-400 font-syne">
+                              No password hint available. You can set one during registration.
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex items-center space-x-2">

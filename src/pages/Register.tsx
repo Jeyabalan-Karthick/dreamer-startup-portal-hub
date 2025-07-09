@@ -131,9 +131,13 @@ const Register = () => {
       [name]: value
     }));
 
-    // Clear email error when user starts typing
-    if (name === 'email' && emailError) {
-      setEmailError('');
+    // Real-time email validation
+    if (name === 'email') {
+      if (value.length > 0 && !validateEmail(value)) {
+        setEmailError('Please enter a valid email address (lowercase, @gmail.com format)');
+      } else {
+        setEmailError('');
+      }
     }
   };
 
@@ -228,57 +232,64 @@ const Register = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center justify-between">
                     <Label htmlFor="password" className="text-gray-800 dark:text-gray-200 font-medium font-syne">Password*</Label>
-                    <div className="relative group">
-                      <HelpCircle className="h-4 w-4 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 cursor-help" />
-                      <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block z-50">
-                        <div className="bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-xs rounded-lg py-2 px-3 whitespace-nowrap shadow-lg">
-                          <div className="text-center mb-1 font-medium">Password Requirements:</div>
-                          <div className="space-y-1">
-                            <div className="flex items-center space-x-2">
-                              <span className="text-green-400 dark:text-green-600">✓</span>
-                              <span>8+ characters</span>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <span className="text-green-400 dark:text-green-600">✓</span>
-                              <span>Uppercase letter</span>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <span className="text-green-400 dark:text-green-600">✓</span>
-                              <span>Lowercase letter</span>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <span className="text-green-400 dark:text-green-600">✓</span>
-                              <span>Number</span>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <span className="text-green-400 dark:text-green-600">✓</span>
-                              <span>Special character</span>
-                            </div>
-                          </div>
-                          <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900 dark:border-t-gray-100"></div>
+                    {formData.password && (
+                      <div className="flex items-center space-x-1">
+                        <div className="flex space-x-1">
+                          <div 
+                            className="w-2 h-2 rounded-full"
+                            style={{ backgroundColor: passwordStrength.score >= 1 ? passwordStrength.color : '#e5e7eb' }}
+                          />
+                          <div 
+                            className="w-2 h-2 rounded-full"
+                            style={{ backgroundColor: passwordStrength.score >= 2 ? passwordStrength.color : '#e5e7eb' }}
+                          />
+                          <div 
+                            className="w-2 h-2 rounded-full"
+                            style={{ backgroundColor: passwordStrength.score >= 3 ? passwordStrength.color : '#e5e7eb' }}
+                          />
                         </div>
+                        <span className="text-xs font-medium ml-2" style={{ color: passwordStrength.color }}>
+                          {passwordStrength.label}
+                        </span>
                       </div>
-                    </div>
+                    )}
                   </div>
 
                   {formData.password && (
                     <div className="mb-2">
-                      <div className="flex items-center justify-between text-sm mb-1">
-                        <span className="text-gray-600 dark:text-gray-300">Password strength:</span>
-                        <span style={{ color: passwordStrength.color }} className="font-medium">
-                          {passwordStrength.label}
-                        </span>
-                      </div>
-                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                        <div
-                          className="h-2 rounded-full transition-all duration-300"
-                          style={{
-                            backgroundColor: passwordStrength.color,
-                            width: `${(passwordStrength.score / 3) * 100}%`
-                          }}
-                        />
+                      <div className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
+                        <div className="flex items-center space-x-2">
+                          <span className={passwordStrength.requirements.length ? "text-green-500" : "text-red-500"}>
+                            {passwordStrength.requirements.length ? "✓" : "✗"}
+                          </span>
+                          <span>8+ characters</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <span className={passwordStrength.requirements.uppercase ? "text-green-500" : "text-red-500"}>
+                            {passwordStrength.requirements.uppercase ? "✓" : "✗"}
+                          </span>
+                          <span>Uppercase letter</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <span className={passwordStrength.requirements.lowercase ? "text-green-500" : "text-red-500"}>
+                            {passwordStrength.requirements.lowercase ? "✓" : "✗"}
+                          </span>
+                          <span>Lowercase letter</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <span className={passwordStrength.requirements.number ? "text-green-500" : "text-red-500"}>
+                            {passwordStrength.requirements.number ? "✓" : "✗"}
+                          </span>
+                          <span>Number</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <span className={passwordStrength.requirements.special ? "text-green-500" : "text-red-500"}>
+                            {passwordStrength.requirements.special ? "✓" : "✗"}
+                          </span>
+                          <span>Special character</span>
+                        </div>
                       </div>
                     </div>
                   )}

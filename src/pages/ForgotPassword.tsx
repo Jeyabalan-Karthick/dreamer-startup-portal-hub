@@ -29,6 +29,23 @@ const ForgotPassword = () => {
     setIsLoading(true);
 
     try {
+      // First check if email is registered
+      const { data: userData, error: userError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', email)
+        .single();
+
+      if (userError && userError.code === 'PGRST116') {
+        // Email not found in profiles
+        toast({
+          title: "Email Not Found",
+          description: "Please enter a registered email address.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       // Use resetPasswordForEmail to trigger password reset OTP
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/reset-password`
