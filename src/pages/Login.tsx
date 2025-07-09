@@ -56,6 +56,24 @@ const Login = () => {
     console.log('Login attempt:', { email: formData.email });
     
     try {
+      // First check if email is registered
+      const { data: userData, error: userError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', formData.email)
+        .single();
+
+      if (userError && userError.code === 'PGRST116') {
+        // Email not found in profiles
+        toast({
+          title: "Email Not Registered",
+          description: "This email address is not registered. Please enter a registered email address.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.password,
@@ -78,11 +96,11 @@ const Login = () => {
         // Specific error messages
         let errorMessage = error.message;
         if (error.message.includes('Invalid login credentials')) {
-          errorMessage = 'Incorrect password. Please try again.';
+          errorMessage = 'Password is wrong. Please try again.';
         } else if (error.message.includes('Email not confirmed')) {
           errorMessage = 'Please verify your email address before logging in.';
         } else if (error.message.includes('User not found')) {
-          errorMessage = 'Email address not registered. Please sign up first.';
+          errorMessage = 'Email address not registered. Please enter a registered email address.';
         }
         
         toast({
@@ -90,6 +108,7 @@ const Login = () => {
           description: errorMessage,
           variant: "destructive",
         });
+        setIsLoading(false);
         return;
       }
 
@@ -135,6 +154,9 @@ const Login = () => {
       } else {
         setEmailError('');
       }
+      // Reset password attempts when email changes
+      setPasswordAttempts(0);
+      setShowPasswordHint(false);
     }
   };
 
