@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -21,7 +20,7 @@ const ResetPassword = () => {
   useEffect(() => {
     // Check if we have the required verification from the forgot password flow
     const state = location.state as { email?: string; verified?: boolean } | null;
-    
+
     if (!state?.email || !state?.verified) {
       toast({
         title: "Access Denied",
@@ -31,13 +30,13 @@ const ResetPassword = () => {
       navigate('/forgot-password');
       return;
     }
-    
+
     setEmail(state.email);
   }, [location.state, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (formData.password !== formData.confirmPassword) {
       toast({
         title: "Error",
@@ -57,7 +56,7 @@ const ResetPassword = () => {
     }
 
     setIsLoading(true);
-    
+
     try {
       const { error } = await supabase.auth.updateUser({
         password: formData.password
@@ -76,10 +75,10 @@ const ResetPassword = () => {
         title: "Password Updated",
         description: "Your password has been successfully updated.",
       });
-      
+
       // Sign out to ensure user logs in with new password
       await supabase.auth.signOut();
-      
+
       // Redirect to login page
       setTimeout(() => {
         navigate('/login');
@@ -118,7 +117,7 @@ const ResetPassword = () => {
           }}
         />
       </div>
-      
+
       {/* Floating Geometric Shapes */}
       <div className="absolute top-20 left-20 w-32 h-32 opacity-20">
         <div 
@@ -130,7 +129,7 @@ const ResetPassword = () => {
           }}
         />
       </div>
-      
+
       <div className="absolute top-40 right-32 w-40 h-40 opacity-15">
         <div 
           className="w-full h-full"
@@ -141,7 +140,7 @@ const ResetPassword = () => {
           }}
         />
       </div>
-      
+
       <div className="absolute bottom-32 left-40 w-36 h-36 opacity-20">
         <div 
           className="w-full h-full"
@@ -152,7 +151,7 @@ const ResetPassword = () => {
           }}
         />
       </div>
-      
+
       <div className="absolute bottom-20 right-20 w-28 h-28 opacity-25">
         <div 
           className="w-full h-full"
@@ -184,7 +183,7 @@ const ResetPassword = () => {
                       required
                       value={formData.password}
                       onChange={handleInputChange}
-                      className="h-12 border-gray-300 focus:border-gray-900 bg-white font-syne relative"
+                      className="h-12 border-gray-300 dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-300 bg-white dark:bg-gray-800 dark:text-gray-100 font-syne relative"
                       placeholder="Enter new password"
                       showPasswordToggle
                     />
@@ -201,7 +200,7 @@ const ResetPassword = () => {
                       required
                       value={formData.confirmPassword}
                       onChange={handleInputChange}
-                      className="h-12 border-gray-300 focus:border-gray-900 bg-white font-syne relative"
+                      className="h-12 border-gray-300 dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-300 bg-white dark:bg-gray-800 dark:text-gray-100 font-syne relative"
                       placeholder="Confirm new password"
                       showPasswordToggle
                     />

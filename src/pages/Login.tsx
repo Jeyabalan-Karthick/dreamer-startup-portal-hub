@@ -217,7 +217,7 @@ const Login = () => {
                     />
                     <button
                       type="button"
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                       onClick={() => setShowPassword(!showPassword)}
                     >
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -232,19 +232,19 @@ const Login = () => {
                         checked={showHint}
                         onCheckedChange={(checked) => setShowHint(checked as boolean)}
                       />
-                      <Label htmlFor="showHint" className="text-sm text-gray-600 font-syne flex items-center">
+                      <Label htmlFor="showHint" className="text-sm text-gray-600 dark:text-gray-400 font-syne flex items-center">
                         <HelpCircle className="h-4 w-4 mr-1" />
                         Show password hint
                       </Label>
                     </div>
                     {showHint && (
-                      <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                      <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
                         {passwordHint ? (
-                          <p className="text-sm text-blue-800 font-syne">
+                          <p className="text-sm text-blue-800 dark:text-blue-200 font-syne">
                             <strong>Hint:</strong> {passwordHint}
                           </p>
                         ) : (
-                          <p className="text-sm text-gray-600 font-syne">
+                          <p className="text-sm text-gray-600 dark:text-gray-400 font-syne">
                             No password hint available. You can set one during registration.
                           </p>
                         )}
@@ -259,7 +259,7 @@ const Login = () => {
                     checked={rememberMe}
                     onCheckedChange={(checked) => setRememberMe(checked as boolean)}
                   />
-                  <Label htmlFor="rememberMe" className="text-sm font-medium text-gray-700 font-syne">
+                  <Label htmlFor="rememberMe" className="text-sm font-medium text-gray-700 dark:text-gray-300 font-syne">
                     Remember me 
                   </Label>
                 </div>
@@ -283,7 +283,7 @@ const Login = () => {
               </div>
 
               <div className="mt-6 text-center">
-                <p className="text-gray-600 font-syne">
+                <p className="text-gray-600 dark:text-gray-400 font-syne">
                   Don't have an account?{' '}
                   <button
                     onClick={() => navigate('/register')}

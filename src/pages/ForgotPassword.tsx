@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -28,7 +27,7 @@ const ForgotPassword = () => {
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     try {
       // Use resetPasswordForEmail to trigger password reset OTP
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -48,7 +47,7 @@ const ForgotPassword = () => {
         title: "OTP Sent",
         description: "Please check your email for the 6-digit verification code.",
       });
-      
+
       setStep('otp');
     } catch (error) {
       console.error('Email verification error:', error);
@@ -64,7 +63,7 @@ const ForgotPassword = () => {
 
   const handleOtpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (otp.length !== 6) {
       toast({
         title: "Invalid OTP",
@@ -75,7 +74,7 @@ const ForgotPassword = () => {
     }
 
     setIsLoading(true);
-    
+
     try {
       const { error } = await supabase.auth.verifyOtp({
         email,
@@ -120,7 +119,7 @@ const ForgotPassword = () => {
           }}
         />
       </div>
-      
+
       {/* Floating Geometric Shapes */}
       <div className="absolute top-20 left-20 w-32 h-32 opacity-20">
         <div 
@@ -132,7 +131,7 @@ const ForgotPassword = () => {
           }}
         />
       </div>
-      
+
       <div className="absolute top-40 right-32 w-40 h-40 opacity-15">
         <div 
           className="w-full h-full"
@@ -143,7 +142,7 @@ const ForgotPassword = () => {
           }}
         />
       </div>
-      
+
       <div className="absolute bottom-32 left-40 w-36 h-36 opacity-20">
         <div 
           className="w-full h-full"
@@ -154,7 +153,7 @@ const ForgotPassword = () => {
           }}
         />
       </div>
-      
+
       <div className="absolute bottom-20 right-20 w-28 h-28 opacity-25">
         <div 
           className="w-full h-full"
@@ -174,7 +173,7 @@ const ForgotPassword = () => {
               <CardTitle className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2 font-syne">
                 {step === 'email' ? 'Forgot Password' : 'Verify OTP'}
               </CardTitle>
-              <p className="text-gray-600 font-syne">
+              <p className="text-gray-600 dark:text-gray-400 font-syne">
                 {step === 'email' 
                   ? 'Enter your email address and we\'ll send you a verification code.' 
                   : 'Enter the 6-digit code sent to your email.'
@@ -229,7 +228,7 @@ const ForgotPassword = () => {
                         </InputOTPGroup>
                       </InputOTP>
                     </div>
-                    <p className="text-sm text-gray-600 text-center font-syne">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 text-center font-syne">
                       Code sent to {email}
                     </p>
                   </div>
@@ -255,7 +254,7 @@ const ForgotPassword = () => {
               )}
 
               <div className="mt-8 text-center">
-                <p className="text-gray-600 font-syne">
+                <p className="text-gray-600 dark:text-gray-400 font-syne">
                   Remember your password?{' '}
                   <button
                     onClick={() => navigate('/login')}

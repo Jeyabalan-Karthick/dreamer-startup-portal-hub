@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -33,7 +32,7 @@ const Register = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Email validation
     if (!validateEmail(formData.email)) {
       setEmailError('Please enter a valid email address (lowercase, @gmail.com format)');
@@ -71,10 +70,10 @@ const Register = () => {
 
     setIsLoading(true);
     console.log('Registration attempt:', { email: formData.email });
-    
+
     try {
       const redirectUrl = "https://dreamer-startup-portal-hub.vercel.app/login";
-      
+
       const { data, error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -100,7 +99,7 @@ const Register = () => {
       }
 
       console.log('Registration successful:', data);
-      
+
       if (data.user && !data.user.email_confirmed_at) {
         toast({
           title: "Registration Successful",
@@ -138,7 +137,7 @@ const Register = () => {
     }
   };
 
-  
+
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
@@ -154,7 +153,7 @@ const Register = () => {
           }}
         />
       </div>
-      
+
       {/* Floating Geometric Shapes */}
       <div className="absolute top-20 left-20 w-32 h-32 opacity-20">
         <div 
@@ -166,7 +165,7 @@ const Register = () => {
           }}
         />
       </div>
-      
+
       <div className="absolute top-40 right-32 w-40 h-40 opacity-15">
         <div 
           className="w-full h-full"
@@ -177,7 +176,7 @@ const Register = () => {
           }}
         />
       </div>
-      
+
       <div className="absolute bottom-32 left-40 w-36 h-36 opacity-20">
         <div 
           className="w-full h-full"
@@ -188,7 +187,7 @@ const Register = () => {
           }}
         />
       </div>
-      
+
       <div className="absolute bottom-20 right-20 w-28 h-28 opacity-25">
         <div 
           className="w-full h-full"
@@ -263,7 +262,7 @@ const Register = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   {formData.password && (
                     <div className="mb-2">
                       <div className="flex items-center justify-between text-sm mb-1">
@@ -283,7 +282,7 @@ const Register = () => {
                       </div>
                     </div>
                   )}
-                  
+
                   <div className="relative overflow-hidden rounded-md">
                     <Input
                       id="password"
@@ -292,12 +291,12 @@ const Register = () => {
                       required
                       value={formData.password}
                       onChange={handleInputChange}
-                      className="h-12 border-gray-300 focus:border-gray-900 bg-white font-syne relative pr-10"
+                      className="h-12 border-gray-300 dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-300 bg-white dark:bg-gray-800 dark:text-gray-100 font-syne relative pr-10"
                       placeholder="Create a password"
                     />
                     <button
                       type="button"
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                       onClick={() => setShowPassword(!showPassword)}
                     >
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -315,12 +314,12 @@ const Register = () => {
                       required
                       value={formData.confirmPassword}
                       onChange={handleInputChange}
-                      className="h-12 border-gray-300 focus:border-gray-900 bg-white font-syne relative pr-10"
+                      className="h-12 border-gray-300 dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-300 bg-white dark:bg-gray-800 dark:text-gray-100 font-syne relative pr-10"
                       placeholder="Confirm your password"
                     />
                     <button
                       type="button"
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     >
                       {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -385,3 +384,4 @@ const Register = () => {
 };
 
 export default Register;
+```Fixing dark mode styling for password inputs and icons.
