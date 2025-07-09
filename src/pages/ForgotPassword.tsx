@@ -21,12 +21,9 @@ const ForgotPassword = () => {
     setIsLoading(true);
     
     try {
-      // Use signInWithOtp with email type to force OTP delivery
-      const { error } = await supabase.auth.signInWithOtp({
-        email: email,
-        options: {
-          shouldCreateUser: false
-        }
+      // Use resetPasswordForEmail to trigger password reset OTP
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`
       });
 
       if (error) {
@@ -74,7 +71,7 @@ const ForgotPassword = () => {
       const { error } = await supabase.auth.verifyOtp({
         email,
         token: otp,
-        type: 'email'
+        type: 'recovery'
       });
 
       if (error) {
