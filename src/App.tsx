@@ -6,11 +6,13 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import Application from "./pages/Application";
 import Admin from "./pages/Admin";
-import NotFound from "./pages/NotFound";
 import Approval from './pages/Approval';
 import Reject from './pages/Reject';
+import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
@@ -22,8 +24,10 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/application" element={<Application />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/approval" element={<Approval />} />

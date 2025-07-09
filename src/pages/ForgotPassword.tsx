@@ -2,67 +2,54 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
-const Login = () => {
+const ForgotPassword = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  });
+  const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
-    console.log('Login attempt:', { email: formData.email });
-    
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: formData.email,
-        password: formData.password,
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
       });
 
       if (error) {
-        console.error('Login error:', error);
         toast({
-          title: "Login Failed",
+          title: "Error",
           description: error.message,
           variant: "destructive",
         });
         return;
       }
 
-      console.log('Login successful:', data);
       toast({
-        title: "Login Successful",
-        description: "Welcome back!",
+        title: "Reset Link Sent",
+        description: "Please check your email for the password reset link.",
       });
       
-      // Redirect to application form
-      navigate('/application');
+      // Redirect to a confirmation page or back to login
+      setTimeout(() => {
+        navigate('/login');
+      }, 2000);
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('Password reset error:', error);
       toast({
-        title: "Login Failed",
+        title: "Error",
         description: "An unexpected error occurred",
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }));
   };
 
   return (
@@ -131,7 +118,8 @@ const Login = () => {
         <div className="w-full max-w-md">
           <Card className="border-0 shadow-2xl bg-white/90 backdrop-blur-sm">
             <CardHeader className="text-center pb-8">
-              <CardTitle className="text-4xl font-bold text-gray-900 mb-2 font-syne">Log In</CardTitle>
+              <CardTitle className="text-4xl font-bold text-gray-900 mb-2 font-syne">Forgot Password</CardTitle>
+              <p className="text-gray-600 font-syne">Enter your email address and we'll send you a link to reset your password.</p>
             </CardHeader>
             <CardContent className="px-8 pb-8">
               <form onSubmit={handleSubmit} className="space-y-6">
@@ -143,27 +131,10 @@ const Login = () => {
                       name="email"
                       type="email"
                       required
-                      value={formData.email}
-                      onChange={handleInputChange}
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
                       className="h-12 border-gray-300 focus:border-gray-900 bg-white font-syne relative"
                       placeholder="Enter your email"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="password" className="text-gray-800 font-medium font-syne">Password*</Label>
-                  <div className="relative overflow-hidden rounded-md">
-                    <Input
-                      id="password"
-                      name="password"
-                      type="password"
-                      required
-                      value={formData.password}
-                      onChange={handleInputChange}
-                      className="h-12 border-gray-300 focus:border-gray-900 bg-white font-syne relative"
-                      placeholder="Create a password"
-                      showPasswordToggle
                     />
                   </div>
                 </div>
@@ -173,27 +144,18 @@ const Login = () => {
                   className="w-full h-12 bg-gray-900 hover:bg-gray-800 text-white font-medium text-lg rounded-md mt-8 font-syne"
                   disabled={isLoading}
                 >
-                  {isLoading ? 'Signing In...' : 'Log in →'}
+                  {isLoading ? 'Sending...' : 'Send Reset Link →'}
                 </Button>
               </form>
 
-              <div className="mt-6 text-center">
-                <button
-                  onClick={() => navigate('/forgot-password')}
-                  className="text-blue-600 hover:underline font-medium font-syne text-sm"
-                >
-                  Forgot your password?
-                </button>
-              </div>
-
-              <div className="mt-6 text-center">
+              <div className="mt-8 text-center">
                 <p className="text-gray-600 font-syne">
-                  Don't have an account?{' '}
+                  Remember your password?{' '}
                   <button
-                    onClick={() => navigate('/register')}
+                    onClick={() => navigate('/login')}
                     className="text-blue-600 hover:underline font-medium font-syne"
                   >
-                    Sign up
+                    Back to Login
                   </button>
                 </p>
               </div>
@@ -205,4 +167,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default ForgotPassword;
