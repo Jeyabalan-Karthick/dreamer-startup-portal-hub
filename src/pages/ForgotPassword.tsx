@@ -21,14 +21,11 @@ const ForgotPassword = () => {
     setIsLoading(true);
     
     try {
-      // Use signInWithOtp to send 6-digit OTP codes
+      // Use signInWithOtp with email type to force OTP delivery
       const { error } = await supabase.auth.signInWithOtp({
         email: email,
         options: {
-          shouldCreateUser: false,
-          data: {
-            type: 'password_reset'
-          }
+          shouldCreateUser: false
         }
       });
 
