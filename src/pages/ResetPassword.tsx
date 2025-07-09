@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,27 +10,30 @@ import { supabase } from "@/integrations/supabase/client";
 
 const ResetPassword = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const location = useLocation();
   const [formData, setFormData] = useState({
     password: '',
     confirmPassword: ''
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState('');
 
   useEffect(() => {
-    // Check if we have the required tokens in the URL
-    const accessToken = searchParams.get('access_token');
-    const refreshToken = searchParams.get('refresh_token');
+    // Check if we have the required verification from the forgot password flow
+    const state = location.state as { email?: string; verified?: boolean } | null;
     
-    if (!accessToken || !refreshToken) {
+    if (!state?.email || !state?.verified) {
       toast({
-        title: "Invalid Link",
-        description: "This password reset link is invalid or has expired.",
+        title: "Access Denied",
+        description: "Please complete the email verification process first.",
         variant: "destructive",
       });
-      navigate('/login');
+      navigate('/forgot-password');
+      return;
     }
-  }, [searchParams, navigate]);
+    
+    setEmail(state.email);
+  }, [location.state, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,6 +76,9 @@ const ResetPassword = () => {
         title: "Password Updated",
         description: "Your password has been successfully updated.",
       });
+      
+      // Sign out to ensure user logs in with new password
+      await supabase.auth.signOut();
       
       // Redirect to login page
       setTimeout(() => {

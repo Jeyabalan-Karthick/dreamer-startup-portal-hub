@@ -5,21 +5,53 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
+  const [step, setStep] = useState<'email' | 'otp'>('email');
   const [email, setEmail] = useState('');
+  const [otp, setOtp] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+      // Check if email exists in the system
+      const { data: users, error: userError } = await supabase.auth.admin.listUsers();
+      
+      if (userError) {
+        toast({
+          title: "Error",
+          description: "Failed to verify email. Please try again.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      const userExists = users.users.some(user => user.email === email);
+      
+      if (!userExists) {
+        toast({
+          title: "Email Not Found",
+          description: "No account found with this email address.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      // Send OTP to email
+      const { error } = await supabase.auth.signInWithOtp({
+        email: email,
+        options: {
+          shouldCreateUser: false
+        }
       });
 
       if (error) {
@@ -32,16 +64,57 @@ const ForgotPassword = () => {
       }
 
       toast({
-        title: "Reset Link Sent",
-        description: "Please check your email for the password reset link.",
+        title: "OTP Sent",
+        description: "Please check your email for the verification code.",
       });
       
-      // Redirect to a confirmation page or back to login
-      setTimeout(() => {
-        navigate('/login');
-      }, 2000);
+      setStep('otp');
     } catch (error) {
-      console.error('Password reset error:', error);
+      console.error('Email verification error:', error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleOtpSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (otp.length !== 6) {
+      toast({
+        title: "Invalid OTP",
+        description: "Please enter a 6-digit OTP code.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    
+    try {
+      const { error } = await supabase.auth.verifyOtp({
+        email,
+        token: otp,
+        type: 'email'
+      });
+
+      if (error) {
+        toast({
+          title: "Invalid OTP",
+          description: "The OTP code is incorrect or has expired.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Navigate to reset password page with email as state
+      navigate('/reset-password', { state: { email, verified: true } });
+    } catch (error) {
+      console.error('OTP verification error:', error);
       toast({
         title: "Error",
         description: "An unexpected error occurred",
@@ -118,35 +191,88 @@ const ForgotPassword = () => {
         <div className="w-full max-w-md">
           <Card className="border-0 shadow-2xl bg-white/90 backdrop-blur-sm">
             <CardHeader className="text-center pb-8">
-              <CardTitle className="text-4xl font-bold text-gray-900 mb-2 font-syne">Forgot Password</CardTitle>
-              <p className="text-gray-600 font-syne">Enter your email address and we'll send you a link to reset your password.</p>
+              <CardTitle className="text-4xl font-bold text-gray-900 mb-2 font-syne">
+                {step === 'email' ? 'Forgot Password' : 'Verify OTP'}
+              </CardTitle>
+              <p className="text-gray-600 font-syne">
+                {step === 'email' 
+                  ? 'Enter your email address and we\'ll send you a verification code.' 
+                  : 'Enter the 6-digit code sent to your email.'
+                }
+              </p>
             </CardHeader>
             <CardContent className="px-8 pb-8">
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="text-gray-800 font-medium font-syne">Email address*</Label>
-                  <div className="relative overflow-hidden rounded-md">
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="h-12 border-gray-300 focus:border-gray-900 bg-white font-syne relative"
-                      placeholder="Enter your email"
-                    />
+              {step === 'email' ? (
+                <form onSubmit={handleEmailSubmit} className="space-y-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-gray-800 font-medium font-syne">Email address*</Label>
+                    <div className="relative overflow-hidden rounded-md">
+                      <Input
+                        id="email"
+                        name="email"
+                        type="email"
+                        required
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="h-12 border-gray-300 focus:border-gray-900 bg-white font-syne relative"
+                        placeholder="Enter your email"
+                      />
+                    </div>
                   </div>
-                </div>
 
-                <Button 
-                  type="submit" 
-                  className="w-full h-12 bg-gray-900 hover:bg-gray-800 text-white font-medium text-lg rounded-md mt-8 font-syne"
-                  disabled={isLoading}
-                >
-                  {isLoading ? 'Sending...' : 'Send Reset Link →'}
-                </Button>
-              </form>
+                  <Button 
+                    type="submit" 
+                    className="w-full h-12 bg-gray-900 hover:bg-gray-800 text-white font-medium text-lg rounded-md mt-8 font-syne"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? 'Sending...' : 'Send OTP →'}
+                  </Button>
+                </form>
+              ) : (
+                <form onSubmit={handleOtpSubmit} className="space-y-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="otp" className="text-gray-800 font-medium font-syne">Verification Code*</Label>
+                    <div className="flex justify-center">
+                      <InputOTP
+                        value={otp}
+                        onChange={setOtp}
+                        maxLength={6}
+                        className="font-syne"
+                      >
+                        <InputOTPGroup>
+                          <InputOTPSlot index={0} className="w-12 h-12 text-lg font-syne border-gray-300 focus:border-gray-900" />
+                          <InputOTPSlot index={1} className="w-12 h-12 text-lg font-syne border-gray-300 focus:border-gray-900" />
+                          <InputOTPSlot index={2} className="w-12 h-12 text-lg font-syne border-gray-300 focus:border-gray-900" />
+                          <InputOTPSlot index={3} className="w-12 h-12 text-lg font-syne border-gray-300 focus:border-gray-900" />
+                          <InputOTPSlot index={4} className="w-12 h-12 text-lg font-syne border-gray-300 focus:border-gray-900" />
+                          <InputOTPSlot index={5} className="w-12 h-12 text-lg font-syne border-gray-300 focus:border-gray-900" />
+                        </InputOTPGroup>
+                      </InputOTP>
+                    </div>
+                    <p className="text-sm text-gray-600 text-center font-syne">
+                      Code sent to {email}
+                    </p>
+                  </div>
+
+                  <Button 
+                    type="submit" 
+                    className="w-full h-12 bg-gray-900 hover:bg-gray-800 text-white font-medium text-lg rounded-md mt-8 font-syne"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? 'Verifying...' : 'Verify OTP →'}
+                  </Button>
+
+                  <div className="text-center">
+                    <button
+                      type="button"
+                      onClick={() => setStep('email')}
+                      className="text-blue-600 hover:underline font-medium font-syne"
+                    >
+                      ← Back to Email
+                    </button>
+                  </div>
+                </form>
+              )}
 
               <div className="mt-8 text-center">
                 <p className="text-gray-600 font-syne">
