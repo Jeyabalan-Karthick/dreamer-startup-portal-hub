@@ -148,61 +148,67 @@ const Register = () => {
       </div>
 
       {/* Main Content */}
-      <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
+      <div className="relative z-10 min-h-screen flex items-center justify-center p-4 font-syne">
         <div className="w-full max-w-md">
           <Card className="border-0 shadow-2xl bg-white/90 backdrop-blur-sm">
             <CardHeader className="text-center pb-8">
-              <CardTitle className="text-3xl font-bold text-gray-900 mb-2">Sign Up</CardTitle>
+              <CardTitle className="text-4xl font-bold text-gray-900 mb-2 font-syne">Sign Up</CardTitle>
             </CardHeader>
             <CardContent className="px-8 pb-8">
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-gray-700 font-medium">Email address*</Label>
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    required
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className="h-12 border-gray-300 focus:border-gray-900 bg-white"
-                    placeholder="Enter your email"
-                  />
+                  <Label htmlFor="email" className="text-gray-800 font-medium font-syne">Email address*</Label>
+                  <div className="relative overflow-hidden rounded-md">
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      required
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      className="h-12 border-gray-300 focus:border-gray-900 bg-white font-syne relative"
+                      placeholder="Enter your email"
+                    />
+                  </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="text-gray-700 font-medium">Password*</Label>
-                  <Input
-                    id="password"
-                    name="password"
-                    type="password"
-                    required
-                    value={formData.password}
-                    onChange={handleInputChange}
-                    className="h-12 border-gray-300 focus:border-gray-900 bg-white"
-                    placeholder="Create a password"
-                    showPasswordToggle
-                  />
+                  <Label htmlFor="password" className="text-gray-800 font-medium font-syne">Password*</Label>
+                  <div className="relative overflow-hidden rounded-md">
+                    <Input
+                      id="password"
+                      name="password"
+                      type="password"
+                      required
+                      value={formData.password}
+                      onChange={handleInputChange}
+                      className="h-12 border-gray-300 focus:border-gray-900 bg-white font-syne relative"
+                      placeholder="Create a password"
+                      showPasswordToggle
+                    />
+                  </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="confirmPassword" className="text-gray-700 font-medium">Confirm Password*</Label>
-                  <Input
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    type="password"
-                    required
-                    value={formData.confirmPassword}
-                    onChange={handleInputChange}
-                    className="h-12 border-gray-300 focus:border-gray-900 bg-white"
-                    placeholder="Confirm your password"
-                    showPasswordToggle
-                  />
+                  <Label htmlFor="confirmPassword" className="text-gray-800 font-medium font-syne">Confirm Password*</Label>
+                  <div className="relative overflow-hidden rounded-md">
+                    <Input
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      type="password"
+                      required
+                      value={formData.confirmPassword}
+                      onChange={handleInputChange}
+                      className="h-12 border-gray-300 focus:border-gray-900 bg-white font-syne relative"
+                      placeholder="Confirm your password"
+                      showPasswordToggle
+                    />
+                  </div>
                 </div>
 
                 <Button 
                   type="submit" 
-                  className="w-full h-12 bg-gray-900 hover:bg-gray-800 text-white font-medium text-lg rounded-md mt-8"
+                  className="w-full h-12 bg-gray-900 hover:bg-gray-800 text-white font-medium text-lg rounded-md mt-8 font-syne"
                   disabled={isLoading}
                 >
                   {isLoading ? 'Creating Account...' : 'Sign up →'}
@@ -210,11 +216,11 @@ const Register = () => {
               </form>
 
               <div className="mt-8 text-center">
-                <p className="text-gray-600">
+                <p className="text-gray-600 font-syne">
                   Already have an account?{' '}
                   <button
                     onClick={() => navigate('/login')}
-                    className="text-blue-600 hover:underline font-medium"
+                    className="text-blue-600 hover:underline font-medium font-syne"
                   >
                     Log in
                   </button>
