@@ -39,10 +39,11 @@ const ForgotPassword = () => {
       if (userError && userError.code === 'PGRST116') {
         // Email not found in profiles
         toast({
-          title: "Email Not Found",
-          description: "Please enter a registered email address.",
+          title: "Email Not Registered",
+          description: "This email address is not registered. Please enter a registered email address.",
           variant: "destructive",
         });
+        setIsLoading(false);
         return;
       }
 
