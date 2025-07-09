@@ -32,20 +32,23 @@ const ForgotPassword = () => {
       // First check if email is registered
       const { data: userData, error: userError } = await supabase
         .from('profiles')
-        .select('id')
+        .select('id, email')
         .eq('email', email)
         .single();
 
-      if (userError && userError.code === 'PGRST116') {
-        // Email not found in profiles
+      if (userError || !userData) {
+        // Email not found in profiles - don't send OTP
         toast({
           title: "Email Not Registered",
-          description: "This email address is not registered. Please enter a registered email address.",
+          description: "This email address is not registered. Please enter a registered email address or sign up first.",
           variant: "destructive",
         });
         setIsLoading(false);
         return;
       }
+
+      // Only proceed if email exists in profiles
+      console.log('Email found in profiles:', userData.email);
 
       // Use resetPasswordForEmail to trigger password reset OTP
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -58,6 +61,7 @@ const ForgotPassword = () => {
           description: error.message,
           variant: "destructive",
         });
+        setIsLoading(false);
         return;
       }
 
