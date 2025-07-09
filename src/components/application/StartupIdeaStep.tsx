@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -40,9 +39,9 @@ const StartupIdeaStep = ({ data, updateData, onPrev }: StartupIdeaStepProps) => 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     console.log('Starting application submission with data:', data);
-    
+
     if (!data.ideaDescription?.trim()) {
       toast({
         title: "Error",
@@ -85,7 +84,7 @@ const StartupIdeaStep = ({ data, updateData, onPrev }: StartupIdeaStepProps) => 
 
     try {
       console.log('Inserting application data...');
-      
+
       const applicationData = {
         founder_name: data.founderName,
         startup_name: data.startupName,
@@ -124,7 +123,7 @@ const StartupIdeaStep = ({ data, updateData, onPrev }: StartupIdeaStepProps) => 
       }
 
       console.log('Application saved successfully:', insertedApplication);
-      
+
       // Send email notification to admin
       console.log('Sending email notification...');
       const { error: emailError } = await supabase.functions.invoke('send-approval-email', {

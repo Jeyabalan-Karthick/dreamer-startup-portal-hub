@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -69,7 +68,7 @@ const IncubationInfoStep = ({ data, updateData, onNext, onPrev }: IncubationInfo
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validation
     if (!data.incubationCentre) {
       toast({
@@ -98,9 +97,9 @@ const IncubationInfoStep = ({ data, updateData, onNext, onPrev }: IncubationInfo
   }
 
   return (
-    <Card className="border-gray-200">
+    <Card className="border-gray-200 dark:border-gray-600 dark:bg-gray-800 shadow-lg dark:shadow-gray-700/20">
       <CardHeader>
-        <CardTitle className="text-gray-900">Incubation Information</CardTitle>
+        <CardTitle className="text-gray-900 dark:text-white text-xl font-semibold">Incubation Information</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">

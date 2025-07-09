@@ -223,7 +223,9 @@ const Application = () => {
         </Card>
 
         {/* Current Step Content */}
-        {renderCurrentStep()}
+        <div className="space-y-6">
+          {renderCurrentStep()}
+        </div>
       </div>
     </div>
   );

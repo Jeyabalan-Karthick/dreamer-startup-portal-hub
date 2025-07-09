@@ -88,7 +88,7 @@ const FounderDetailsStep = ({ data, updateData, onNext }: FounderDetailsStepProp
       setCouponId(null);
       return;
     }
-    
+
     // 2. Check if coupon is active
     if (!coupon.is_active) {
       setCouponStatus('invalid');
@@ -96,7 +96,7 @@ const FounderDetailsStep = ({ data, updateData, onNext }: FounderDetailsStepProp
       setCouponId(null);
       return;
     }
-    
+
     // 3. Check expiry
     const now = new Date();
     if (new Date(coupon.expires_at) < now) {
@@ -134,11 +134,11 @@ const FounderDetailsStep = ({ data, updateData, onNext }: FounderDetailsStepProp
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validation
     const requiredFields = ['founderName', 'startupName', 'email', 'phone', 'companyType', 'teamSize', 'source', 'couponCode'];
     const missingFields = requiredFields.filter(field => !data[field] || (data[field] === 'Others' && !companyTypeOther) || (data[field] === 'Other' && !sourceOther));
-    
+
     if (missingFields.length > 0) {
       toast({
         title: "Missing Information",
@@ -197,32 +197,32 @@ const FounderDetailsStep = ({ data, updateData, onNext }: FounderDetailsStepProp
   };
 
   return (
-    <Card className="border-gray-200">
+    <Card className="border-gray-200 dark:border-gray-600 dark:bg-gray-800 shadow-lg dark:shadow-gray-700/20">
       <CardHeader>
-        <CardTitle className="text-gray-900">Founder & Startup Details</CardTitle>
+        <CardTitle className="text-gray-900 dark:text-white text-xl font-semibold">Founder & Startup Details</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="founderName" className="text-gray-700">Founder Name *</Label>
+              <Label htmlFor="founderName" className="text-gray-800 dark:text-gray-200 font-medium">Founder Name *</Label>
               <Input
                 id="founderName"
                 value={data.founderName || ''}
                 onChange={(e) => handleInputChange('founderName', e.target.value)}
-                className="border-gray-300"
+                className="border-gray-300 dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-300 bg-white dark:bg-gray-700 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                 placeholder="Enter your full name"
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="startupName" className="text-gray-700">Startup Name *</Label>
+              <Label htmlFor="startupName" className="text-gray-800 dark:text-gray-200 font-medium">Startup Name *</Label>
               <Input
                 id="startupName"
                 value={data.startupName || ''}
                 onChange={(e) => handleInputChange('startupName', e.target.value)}
-                className="border-gray-300"
+                className="border-gray-300 dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-300 bg-white dark:bg-gray-700 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                 placeholder="Enter your startup name"
                 required
               />
@@ -231,26 +231,26 @@ const FounderDetailsStep = ({ data, updateData, onNext }: FounderDetailsStepProp
 
           <div className="grid md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-gray-700">Email Address *</Label>
+              <Label htmlFor="email" className="text-gray-800 dark:text-gray-200 font-medium">Email Address *</Label>
               <Input
                 id="email"
                 type="email"
                 value={data.email || ''}
                 readOnly
-                className="border-gray-300 bg-gray-100 cursor-not-allowed"
+                className="border-gray-300 bg-gray-100 cursor-not-allowed dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-300 bg-white dark:bg-gray-700 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                 placeholder="Enter your email"
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="phone" className="text-gray-700">Phone Number *</Label>
+              <Label htmlFor="phone" className="text-gray-800 dark:text-gray-200 font-medium">Phone Number *</Label>
               <Input
                 id="phone"
                 type="tel"
                 value={data.phone || ''}
                 onChange={(e) => handleInputChange('phone', e.target.value)}
-                className="border-gray-300"
+                className="border-gray-300 dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-300 bg-white dark:bg-gray-700 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                 placeholder="Enter your phone number"
                 required
               />
@@ -259,15 +259,15 @@ const FounderDetailsStep = ({ data, updateData, onNext }: FounderDetailsStepProp
 
           <div className="grid md:grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label className="text-gray-700">Company Type *</Label>
+              <Label className="text-gray-800 dark:text-gray-200 font-medium">Company Type *</Label>
               <Select value={data.companyType || ''} onValueChange={handleCompanyTypeChange}>
-                <SelectTrigger className="border-gray-300">
-                  <SelectValue placeholder="Select type" />
+                <SelectTrigger className="border-gray-300 dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-300 bg-white dark:bg-gray-700 dark:text-gray-100">
+                  <SelectValue placeholder="Select type" className="placeholder:text-gray-500 dark:placeholder:text-gray-400" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="MSME">MSME</SelectItem>
-                  <SelectItem value="Pvt Ltd">Pvt Ltd</SelectItem>
-                  <SelectItem value="Others">Others</SelectItem>
+                <SelectContent className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600">
+                  <SelectItem value="MSME" className="dark:text-gray-100 dark:hover:bg-gray-700">MSME</SelectItem>
+                  <SelectItem value="Pvt Ltd" className="dark:text-gray-100 dark:hover:bg-gray-700">Pvt Ltd</SelectItem>
+                  <SelectItem value="Others" className="dark:text-gray-100 dark:hover:bg-gray-700">Others</SelectItem>
                 </SelectContent>
               </Select>
               {/* Animated input for Others */}
@@ -278,7 +278,7 @@ const FounderDetailsStep = ({ data, updateData, onNext }: FounderDetailsStepProp
               }}>
                 {showCompanyTypeOther && (
                   <Input
-                    className="mt-2 border-gray-300"
+                    className="mt-2 border-gray-300 dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-300 bg-white dark:bg-gray-700 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                     placeholder="Please specify company type"
                     value={companyTypeOther}
                     onChange={handleCompanyTypeOtherChange}
@@ -289,32 +289,32 @@ const FounderDetailsStep = ({ data, updateData, onNext }: FounderDetailsStepProp
             </div>
 
             <div className="space-y-2">
-              <Label className="text-gray-700">Team Size *</Label>
+              <Label className="text-gray-800 dark:text-gray-200 font-medium">Team Size *</Label>
               <Select value={data.teamSize || ''} onValueChange={(value) => handleInputChange('teamSize', value)}>
-                <SelectTrigger className="border-gray-300">
-                  <SelectValue placeholder="Select size" />
+                <SelectTrigger className="border-gray-300 dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-300 bg-white dark:bg-gray-700 dark:text-gray-100">
+                  <SelectValue placeholder="Select size" className="placeholder:text-gray-500 dark:placeholder:text-gray-400" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1">1 Member</SelectItem>
-                  <SelectItem value="2-5">2-5 Members</SelectItem>
-                  <SelectItem value="6-10">6-10 Members</SelectItem>
-                  <SelectItem value="10+">10+ Members</SelectItem>
+                <SelectContent className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600">
+                  <SelectItem value="1" className="dark:text-gray-100 dark:hover:bg-gray-700">1 Member</SelectItem>
+                  <SelectItem value="2-5" className="dark:text-gray-100 dark:hover:bg-gray-700">2-5 Members</SelectItem>
+                  <SelectItem value="6-10" className="dark:text-gray-100 dark:hover:bg-gray-700">6-10 Members</SelectItem>
+                  <SelectItem value="10+" className="dark:text-gray-100 dark:hover:bg-gray-700">10+ Members</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <Label className="text-gray-700">How did you hear about us? *</Label>
+              <Label className="text-gray-800 dark:text-gray-200 font-medium">How did you hear about us? *</Label>
               <Select value={data.source || ''} onValueChange={handleSourceChange}>
-                <SelectTrigger className="border-gray-300">
-                  <SelectValue placeholder="Select source" />
+                <SelectTrigger className="border-gray-300 dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-300 bg-white dark:bg-gray-700 dark:text-gray-100">
+                  <SelectValue placeholder="Select source" className="placeholder:text-gray-500 dark:placeholder:text-gray-400" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Social Media">Social Media</SelectItem>
-                  <SelectItem value="Friend/Referral">Friend/Referral</SelectItem>
-                  <SelectItem value="Event">Event</SelectItem>
-                  <SelectItem value="Website">Website</SelectItem>
-                  <SelectItem value="Other">Other</SelectItem>
+                <SelectContent className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600">
+                  <SelectItem value="Social Media" className="dark:text-gray-100 dark:hover:bg-gray-700">Social Media</SelectItem>
+                  <SelectItem value="Friend/Referral" className="dark:text-gray-100 dark:hover:bg-gray-700">Friend/Referral</SelectItem>
+                  <SelectItem value="Event" className="dark:text-gray-100 dark:hover:bg-gray-700">Event</SelectItem>
+                  <SelectItem value="Website" className="dark:text-gray-100 dark:hover:bg-gray-700">Website</SelectItem>
+                  <SelectItem value="Other" className="dark:text-gray-100 dark:hover:bg-gray-700">Other</SelectItem>
                 </SelectContent>
               </Select>
               {/* Animated input for Other */}
@@ -325,7 +325,7 @@ const FounderDetailsStep = ({ data, updateData, onNext }: FounderDetailsStepProp
               }}>
                 {showSourceOther && (
                   <Input
-                    className="mt-2 border-gray-300"
+                    className="mt-2 border-gray-300 dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-300 bg-white dark:bg-gray-700 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                     placeholder="Please specify how you heard about us"
                     value={sourceOther}
                     onChange={handleSourceOtherChange}
@@ -337,13 +337,13 @@ const FounderDetailsStep = ({ data, updateData, onNext }: FounderDetailsStepProp
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="couponCode" className="text-gray-700">Coupon Code *</Label>
+            <Label htmlFor="couponCode" className="text-gray-800 dark:text-gray-200 font-medium">Coupon Code *</Label>
             <div className="relative">
               <Input
                 id="couponCode"
                 value={data.couponCode || ''}
                 onChange={handleCouponChange}
-                className="border-gray-300 pr-10"
+                className="border-gray-300 pr-10 dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-300 bg-white dark:bg-gray-700 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                 placeholder="Enter your coupon code"
                 required
               />
@@ -377,7 +377,7 @@ const FounderDetailsStep = ({ data, updateData, onNext }: FounderDetailsStepProp
                 <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none" />
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 16v-4m0-4h.01" />
               </svg>
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-gray-500 dark:text-gray-400">
                 If you don't have a coupon code,&nbsp;
                 <a
                   href="https://mail.google.com/mail/?view=cm&fs=1&to=brandmindzteam@gmail.com&su=Need%20Coupon%20Code%20for%20Application&body=Hi%20Team%2C%0A%0AI%20would%20like%20to%20request%20a%20coupon%20code%20for%20the%20incubation%20program.%0A%0ARegards%2C%0A"
@@ -387,7 +387,7 @@ const FounderDetailsStep = ({ data, updateData, onNext }: FounderDetailsStepProp
                   onClick={e => {
                     // Add user's email to the body if available
                     if (data.email) {
-                      const url = `https://mail.google.com/mail/?view=cm&fs=1&to=brandmindzteam@gmail.com&su=Need%20Coupon%20Code%20for%20Application&body=Hi%20Team%2C%0A%0AI%20would%20like%20to%20request%20a%20coupon%20code%20for%20the%20incubation%20program.%0A%0ARegards%2C%0A${encodeURIComponent(data.email)}`;
+                      const url = `https://mail.google.com/mail/?view=cm&fs=1&to=brandmindzteam@gmail.com&su=Need%20Coupon%20Code%20Code%20for%20Application&body=Hi%20Team%2C%0A%0AI%20would%20like%20to%20request%20a%20coupon%20code%20for%20the%20incubation%20program.%0A%0ARegards%2C%0A${encodeURIComponent(data.email)}`;
                       window.open(url, '_blank', 'noopener,noreferrer');
                       e.preventDefault();
                     }
@@ -403,7 +403,7 @@ const FounderDetailsStep = ({ data, updateData, onNext }: FounderDetailsStepProp
           <div className="flex justify-end">
             <Button 
               type="submit" 
-              className="bg-gray-900 hover:bg-gray-800 text-white px-8"
+              className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 font-medium px-8 py-2 rounded-md transition-colors duration-200"
             >
               Next Step
             </Button>
