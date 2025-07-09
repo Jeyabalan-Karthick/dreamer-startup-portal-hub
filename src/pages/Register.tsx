@@ -137,44 +137,7 @@ const Register = () => {
     }
   };
 
-  const PasswordStrengthIndicator = () => (
-    <div className="mt-2">
-      <div className="flex items-center justify-between text-sm mb-1">
-        <span className="text-gray-600">Password strength:</span>
-        <span style={{ color: passwordStrength.color }} className="font-medium">
-          {passwordStrength.label}
-        </span>
-      </div>
-      <div className="w-full bg-gray-200 rounded-full h-2">
-        <div
-          className="h-2 rounded-full transition-all duration-300"
-          style={{
-            backgroundColor: passwordStrength.color,
-            width: `${(passwordStrength.score / 3) * 100}%`
-          }}
-        />
-      </div>
-      <div className="mt-2 text-xs text-gray-600">
-        <div className="grid grid-cols-2 gap-1">
-          <div className={passwordStrength.requirements.length ? 'text-green-600' : 'text-red-500'}>
-            ✓ 8+ characters
-          </div>
-          <div className={passwordStrength.requirements.uppercase ? 'text-green-600' : 'text-red-500'}>
-            ✓ Uppercase letter
-          </div>
-          <div className={passwordStrength.requirements.lowercase ? 'text-green-600' : 'text-red-500'}>
-            ✓ Lowercase letter
-          </div>
-          <div className={passwordStrength.requirements.number ? 'text-green-600' : 'text-red-500'}>
-            ✓ Number
-          </div>
-          <div className={passwordStrength.requirements.special ? 'text-green-600' : 'text-red-500'}>
-            ✓ Special character
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  
 
   return (
     <div className="min-h-screen relative overflow-hidden" style={{
@@ -266,7 +229,61 @@ const Register = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="text-gray-800 font-medium font-syne">Password*</Label>
+                  <div className="flex items-center space-x-2">
+                    <Label htmlFor="password" className="text-gray-800 font-medium font-syne">Password*</Label>
+                    <div className="relative group">
+                      <HelpCircle className="h-4 w-4 text-gray-400 hover:text-gray-600 cursor-help" />
+                      <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block z-50">
+                        <div className="bg-gray-900 text-white text-xs rounded-lg py-2 px-3 whitespace-nowrap shadow-lg">
+                          <div className="text-center mb-1 font-medium">Password Requirements:</div>
+                          <div className="space-y-1">
+                            <div className="flex items-center space-x-2">
+                              <span className="text-green-400">✓</span>
+                              <span>8+ characters</span>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <span className="text-green-400">✓</span>
+                              <span>Uppercase letter</span>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <span className="text-green-400">✓</span>
+                              <span>Lowercase letter</span>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <span className="text-green-400">✓</span>
+                              <span>Number</span>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <span className="text-green-400">✓</span>
+                              <span>Special character</span>
+                            </div>
+                          </div>
+                          <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {formData.password && (
+                    <div className="mb-2">
+                      <div className="flex items-center justify-between text-sm mb-1">
+                        <span className="text-gray-600">Password strength:</span>
+                        <span style={{ color: passwordStrength.color }} className="font-medium">
+                          {passwordStrength.label}
+                        </span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div
+                          className="h-2 rounded-full transition-all duration-300"
+                          style={{
+                            backgroundColor: passwordStrength.color,
+                            width: `${(passwordStrength.score / 3) * 100}%`
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                  
                   <div className="relative overflow-hidden rounded-md">
                     <Input
                       id="password"
@@ -286,7 +303,6 @@ const Register = () => {
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
                   </div>
-                  {formData.password && <PasswordStrengthIndicator />}
                 </div>
 
                 <div className="space-y-2">
