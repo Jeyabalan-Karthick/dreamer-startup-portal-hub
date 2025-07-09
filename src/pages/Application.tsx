@@ -155,8 +155,8 @@ const Application = () => {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 dark:border-gray-100 mx-auto"></div>
-          <p className="mt-4 text-gray-600 dark:text-gray-400">Checking application status...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 dark:border-white mx-auto"></div>
+          <p className="mt-4 text-gray-600 dark:text-gray-300 font-medium">Checking application status...</p>
         </div>
       </div>
     );
@@ -182,37 +182,37 @@ const Application = () => {
       <div className="container mx-auto px-4 max-w-4xl">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">Startup Application</h1>
-          <p className="text-gray-600 dark:text-gray-400">Complete your application for the Dreamers Incubation Program</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Startup Application</h1>
+          <p className="text-gray-600 dark:text-gray-300">Complete your application for the Dreamers Incubation Program</p>
         </div>
 
         {/* Progress Bar */}
-        <Card className="mb-8 border-gray-200 dark:border-gray-700 dark:bg-gray-800">
+        <Card className="mb-8 border-gray-200 dark:border-gray-600 dark:bg-gray-800 shadow-lg dark:shadow-gray-700/20">
           <CardContent className="pt-6">
             <div className="mb-4">
-              <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-2">
+              <div className="flex justify-between text-sm text-gray-700 dark:text-gray-200 font-medium mb-2">
                 <span>Step {currentStep} of {steps.length}</span>
                 <span>{Math.round(progress)}% Complete</span>
               </div>
-              <Progress value={progress} className="h-2" />
+              <Progress value={progress} className="h-2 bg-gray-200 dark:bg-gray-700" />
             </div>
             
             {/* Step Indicators */}
             <div className="flex justify-between">
               {steps.map((step) => (
                 <div key={step.number} className="flex-1 text-center">
-                  <div className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium mb-2 ${
+                  <div className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold mb-2 transition-all duration-200 ${
                     step.number <= currentStep 
-                      ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900' 
-                      : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+                      ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-lg' 
+                      : 'bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300'
                   }`}>
                     {step.number}
                   </div>
                   <div className="text-xs">
-                    <div className={`font-medium ${step.number <= currentStep ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-400'}`}>
+                    <div className={`font-semibold ${step.number <= currentStep ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'}`}>
                       {step.title}
                     </div>
-                    <div className="text-gray-400 dark:text-gray-500 hidden sm:block">
+                    <div className={`${step.number <= currentStep ? 'text-gray-600 dark:text-gray-300' : 'text-gray-400 dark:text-gray-500'} hidden sm:block`}>
                       {step.description}
                     </div>
                   </div>
