@@ -286,30 +286,30 @@ const ApplicationSuccess = ({ applicationId }: ApplicationSuccessProps) => {
 
   if (applicationStatus === 'pending') {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
         <div className="container mx-auto px-4 max-w-2xl">
-          <Card className="border-gray-200 shadow-lg">
+          <Card className="border-gray-200 dark:border-gray-700 dark:bg-gray-800 shadow-lg dark:shadow-gray-700/20">
             <CardHeader className="text-center">
-              <div className="mx-auto mb-4 w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center">
-                <Clock className="w-8 h-8 text-yellow-600" />
+              <div className="mx-auto mb-4 w-16 h-16 bg-yellow-100 dark:bg-yellow-900/30 rounded-full flex items-center justify-center">
+                <Clock className="w-8 h-8 text-yellow-600 dark:text-yellow-400" />
               </div>
-              <CardTitle className="text-2xl">Application Submitted Successfully!</CardTitle>
+              <CardTitle className="text-2xl text-gray-900 dark:text-white">Application Submitted Successfully!</CardTitle>
             </CardHeader>
             <CardContent className="text-center space-y-4">
-              <p className="text-gray-600">
-                Thank you for submitting your application. We've sent it to <strong>{applicationData?.incubation_centre}</strong> admin for review.
+              <p className="text-gray-600 dark:text-gray-300">
+                Thank you for submitting your application. We've sent it to <strong className="text-gray-900 dark:text-white">{applicationData?.incubation_centre}</strong> admin for review.
               </p>
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                <p className="text-yellow-800 font-medium">⏳ Waiting for Admin Approval</p>
-                <p className="text-yellow-700 text-sm mt-1">
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg p-4">
+                <p className="text-yellow-800 dark:text-yellow-300 font-medium">⏳ Waiting for Admin Approval</p>
+                <p className="text-yellow-700 dark:text-yellow-400 text-sm mt-1">
                   You'll receive an email notification once your application is reviewed by the incubation center admin.
                 </p>
               </div>
               
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
-                <h4 className="font-medium text-blue-800 mb-2">📧 Application Details Sent To:</h4>
-                <p className="text-blue-700 text-sm">{applicationData?.incubation_centre} Admin</p>
-                <p className="text-blue-600 text-xs mt-1">The admin will review your application and approve/reject it.</p>
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4 mt-4">
+                <h4 className="font-medium text-blue-800 dark:text-blue-300 mb-2">📧 Application Details Sent To:</h4>
+                <p className="text-blue-700 dark:text-blue-400 text-sm">{applicationData?.incubation_centre} Admin</p>
+                <p className="text-blue-600 dark:text-blue-400 text-xs mt-1">The admin will review your application and approve/reject it.</p>
               </div>
             </CardContent>
           </Card>
@@ -322,53 +322,53 @@ const ApplicationSuccess = ({ applicationId }: ApplicationSuccessProps) => {
     return (
       <>
         <ApprovalModal />
-        <div className="min-h-screen bg-gray-50 py-8">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
           <div className="container mx-auto px-4 max-w-4xl">
-            <Card className="border-gray-200 shadow-lg">
+            <Card className="border-gray-200 dark:border-gray-700 dark:bg-gray-800 shadow-lg dark:shadow-gray-700/20">
               <CardHeader className="text-center">
-                <div className="mx-auto mb-4 w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-                  <CheckCircle className="w-8 h-8 text-green-600" />
+                <div className="mx-auto mb-4 w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
+                  <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
                 </div>
-                <CardTitle className="text-3xl text-green-700 mb-2">🎉 Congratulations!</CardTitle>
-                <p className="text-xl text-gray-600">Your application has been approved by {applicationData?.incubation_centre}!</p>
+                <CardTitle className="text-3xl text-green-700 dark:text-green-400 mb-2">🎉 Congratulations!</CardTitle>
+                <p className="text-xl text-gray-600 dark:text-gray-300">Your application has been approved by {applicationData?.incubation_centre}!</p>
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Benefits Section */}
-                <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-xl p-6">
-                  <h3 className="text-2xl font-bold text-green-800 mb-4 flex items-center">
+                <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-700 rounded-xl p-6">
+                  <h3 className="text-2xl font-bold text-green-800 dark:text-green-300 mb-4 flex items-center">
                     <Gift className="mr-3 w-8 h-8" />
                     ₹40,000 Worth of Benefits
                   </h3>
                   <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-4">
-                      <div className="flex items-start space-x-3 bg-white p-4 rounded-lg shadow-sm">
-                        <Users className="w-6 h-6 text-green-600 mt-1 flex-shrink-0" />
+                      <div className="flex items-start space-x-3 bg-white dark:bg-gray-700 p-4 rounded-lg shadow-sm dark:shadow-gray-600/20">
+                        <Users className="w-6 h-6 text-green-600 dark:text-green-400 mt-1 flex-shrink-0" />
                         <div>
-                          <h4 className="font-semibold text-gray-800">Expert Consultation Booking</h4>
-                          <p className="text-sm text-gray-600">1-on-1 sessions with industry experts and mentors</p>
+                          <h4 className="font-semibold text-gray-800 dark:text-white">Expert Consultation Booking</h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-300">1-on-1 sessions with industry experts and mentors</p>
                         </div>
                       </div>
-                      <div className="flex items-start space-x-3 bg-white p-4 rounded-lg shadow-sm">
-                        <Download className="w-6 h-6 text-green-600 mt-1 flex-shrink-0" />
+                      <div className="flex items-start space-x-3 bg-white dark:bg-gray-700 p-4 rounded-lg shadow-sm dark:shadow-gray-600/20">
+                        <Download className="w-6 h-6 text-green-600 dark:text-green-400 mt-1 flex-shrink-0" />
                         <div>
-                          <h4 className="font-semibold text-gray-800">Premium Resource Downloads</h4>
-                          <p className="text-sm text-gray-600">Business templates, pitch decks, legal documents & guides</p>
+                          <h4 className="font-semibold text-gray-800 dark:text-white">Premium Resource Downloads</h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-300">Business templates, pitch decks, legal documents & guides</p>
                         </div>
                       </div>
                     </div>
                     <div className="space-y-4">
-                      <div className="flex items-start space-x-3 bg-white p-4 rounded-lg shadow-sm">
-                        <Phone className="w-6 h-6 text-green-600 mt-1 flex-shrink-0" />
+                      <div className="flex items-start space-x-3 bg-white dark:bg-gray-700 p-4 rounded-lg shadow-sm dark:shadow-gray-600/20">
+                        <Phone className="w-6 h-6 text-green-600 dark:text-green-400 mt-1 flex-shrink-0" />
                         <div>
-                          <h4 className="font-semibold text-gray-800">Dedicated Support Contact</h4>
-                          <p className="text-sm text-gray-600">Direct line to our support team for immediate assistance</p>
+                          <h4 className="font-semibold text-gray-800 dark:text-white">Dedicated Support Contact</h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-300">Direct line to our support team for immediate assistance</p>
                         </div>
                       </div>
-                      <div className="flex items-start space-x-3 bg-white p-4 rounded-lg shadow-sm">
-                        <Gift className="w-6 h-6 text-green-600 mt-1 flex-shrink-0" />
+                      <div className="flex items-start space-x-3 bg-white dark:bg-gray-700 p-4 rounded-lg shadow-sm dark:shadow-gray-600/20">
+                        <Gift className="w-6 h-6 text-green-600 dark:text-green-400 mt-1 flex-shrink-0" />
                         <div>
-                          <h4 className="font-semibold text-gray-800">Partner Tools & Credits</h4>
-                          <p className="text-sm text-gray-600">Access to premium software, cloud credits & services</p>
+                          <h4 className="font-semibold text-gray-800 dark:text-white">Partner Tools & Credits</h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-300">Access to premium software, cloud credits & services</p>
                         </div>
                       </div>
                     </div>
@@ -376,12 +376,12 @@ const ApplicationSuccess = ({ applicationId }: ApplicationSuccessProps) => {
                 </div>
 
                 {/* Support Contact Information */}
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-                  <h4 className="font-semibold text-blue-800 mb-4 flex items-center">
+                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-6">
+                  <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-4 flex items-center">
                     <Mail className="mr-2 w-5 h-5" />
                     📞 Support Contact Information
                   </h4>
-                  <div className="grid md:grid-cols-3 gap-4 text-sm text-blue-700">
+                  <div className="grid md:grid-cols-3 gap-4 text-sm text-blue-700 dark:text-blue-400">
                     <div className="flex items-center space-x-2">
                       <Mail className="w-4 h-4" />
                       <span>brandmindzteam@gmail.com</span>
@@ -399,24 +399,24 @@ const ApplicationSuccess = ({ applicationId }: ApplicationSuccessProps) => {
 
                 {/* Action Buttons */}
                 <div className="flex flex-wrap gap-4 justify-center pt-4">
-                  <Button className="bg-green-600 hover:bg-green-700 text-white px-6 py-3">
+                  <Button className="bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 text-white px-6 py-3 font-semibold shadow-lg hover:shadow-xl transition-all duration-200">
                     <Users className="mr-2 w-4 h-4" />
                     Book Consultation
                   </Button>
-                  <Button variant="outline" className="border-green-600 text-green-600 hover:bg-green-50 px-6 py-3">
+                  <Button variant="outline" className="border-green-600 dark:border-green-500 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 px-6 py-3 font-semibold transition-colors duration-200">
                     <Download className="mr-2 w-4 h-4" />
                     Download Resources
                   </Button>
-                  <Button variant="outline" className="border-blue-600 text-blue-600 hover:bg-blue-50 px-6 py-3">
+                  <Button variant="outline" className="border-blue-600 dark:border-blue-500 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-6 py-3 font-semibold transition-colors duration-200">
                     <ExternalLink className="mr-2 w-4 h-4" />
                     Contact Support
                   </Button>
                 </div>
 
                 {/* Additional Info */}
-                <div className="text-center pt-4 border-t border-gray-200">
-                  <p className="text-sm text-gray-500">
-                    Approved by <strong>{applicationData?.incubation_centre}</strong> on{' '}
+                <div className="text-center pt-4 border-t border-gray-200 dark:border-gray-700">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Approved by <strong className="text-gray-700 dark:text-gray-300">{applicationData?.incubation_centre}</strong> on{' '}
                     {applicationData?.approved_at && new Date(applicationData.approved_at).toLocaleDateString()}
                   </p>
                 </div>
@@ -430,35 +430,35 @@ const ApplicationSuccess = ({ applicationId }: ApplicationSuccessProps) => {
 
   if (applicationStatus === 'rejected') {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
         <div className="container mx-auto px-4 max-w-2xl">
-          <Card className="border-gray-200 shadow-lg">
+          <Card className="border-gray-200 dark:border-gray-700 dark:bg-gray-800 shadow-lg dark:shadow-gray-700/20">
             <CardHeader className="text-center">
-              <div className="mx-auto mb-4 w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
-                <CheckCircle className="w-8 h-8 text-red-600" />
+              <div className="mx-auto mb-4 w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
+                <CheckCircle className="w-8 h-8 text-red-600 dark:text-red-400" />
               </div>
-              <CardTitle className="text-2xl text-red-700">Application Not Approved</CardTitle>
+              <CardTitle className="text-2xl text-red-700 dark:text-red-400">Application Not Approved</CardTitle>
             </CardHeader>
             <CardContent className="text-center space-y-4">
-              <p className="text-gray-600">
-                Unfortunately, your application was not approved by <strong>{applicationData?.incubation_centre}</strong> at this time.
+              <p className="text-gray-600 dark:text-gray-300">
+                Unfortunately, your application was not approved by <strong className="text-gray-900 dark:text-white">{applicationData?.incubation_centre}</strong> at this time.
               </p>
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                <p className="text-red-800 font-medium">Next Steps</p>
-                <p className="text-red-700 text-sm mt-1">
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg p-4">
+                <p className="text-red-800 dark:text-red-300 font-medium">Next Steps</p>
+                <p className="text-red-700 dark:text-red-400 text-sm mt-1">
                   You can contact support for feedback or submit a new application in the future.
                 </p>
               </div>
               
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
-                <h4 className="font-medium text-blue-800 mb-2">📞 Support Contact</h4>
-                <div className="text-sm text-blue-700">
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4 mt-4">
+                <h4 className="font-medium text-blue-800 dark:text-blue-300 mb-2">📞 Support Contact</h4>
+                <div className="text-sm text-blue-700 dark:text-blue-400">
                   <p>Email: brandmindzteam@gmail.com</p>
                   <p>Phone: +91-9876543210</p>
                 </div>
               </div>
               
-              <Button variant="outline" className="mt-4">
+              <Button variant="outline" className="mt-4 border-blue-600 dark:border-blue-500 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 font-semibold transition-colors duration-200">
                 <Mail className="mr-2 w-4 h-4" />
                 Contact Support
               </Button>

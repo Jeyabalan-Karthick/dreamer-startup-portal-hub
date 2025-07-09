@@ -17,15 +17,22 @@ const Reject: React.FC = () => {
   }, [searchParams]);
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent>
-        <DialogTitle>Application Rejection</DialogTitle>
-        <div style={{ marginBottom: 16 }}>
-          ❌ Application rejection notification has been sent to the user.
-        </div>
-        <Button onClick={() => setOpen(false)}>Close</Button>
-      </DialogContent>
-    </Dialog>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="border-gray-200 dark:border-gray-700 dark:bg-gray-800">
+          <DialogTitle className="text-gray-900 dark:text-white">Application Rejection</DialogTitle>
+          <div className="mb-4 text-gray-600 dark:text-gray-300">
+            ❌ Application rejection notification has been sent to the user.
+          </div>
+          <Button 
+            onClick={() => setOpen(false)}
+            className="bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-100 text-white dark:text-gray-900 font-semibold transition-colors duration-200"
+          >
+            Close
+          </Button>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 };
 
