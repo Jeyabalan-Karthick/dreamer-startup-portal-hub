@@ -21,32 +21,7 @@ const ForgotPassword = () => {
     setIsLoading(true);
     
     try {
-      // Check if email exists in the system
-      const { data: users, error: userError } = await supabase.auth.admin.listUsers();
-      
-      if (userError) {
-        toast({
-          title: "Error",
-          description: "Failed to verify email. Please try again.",
-          variant: "destructive",
-        });
-        setIsLoading(false);
-        return;
-      }
-
-      const userExists = users.users.some(user => user.email === email);
-      
-      if (!userExists) {
-        toast({
-          title: "Email Not Found",
-          description: "No account found with this email address.",
-          variant: "destructive",
-        });
-        setIsLoading(false);
-        return;
-      }
-
-      // Send OTP to email
+      // Send OTP to email - Supabase will only send if email exists
       const { error } = await supabase.auth.signInWithOtp({
         email: email,
         options: {
@@ -65,7 +40,7 @@ const ForgotPassword = () => {
 
       toast({
         title: "OTP Sent",
-        description: "Please check your email for the verification code.",
+        description: "Please check your email for the verification code. If you don't receive it, the email may not be registered.",
       });
       
       setStep('otp');
