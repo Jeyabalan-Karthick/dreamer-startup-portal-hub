@@ -336,7 +336,7 @@ const Register = () => {
                     onCheckedChange={(checked) => setRememberMe(checked as boolean)}
                   />
                   <Label htmlFor="rememberMe" className="text-sm font-medium text-gray-700 font-syne">
-                    Remember me on this device
+                    Remember me 
                   </Label>
                 </div>
 
