@@ -8,8 +8,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { validateEmail, checkPasswordStrength, validatePassword } from "@/lib/validation-utils";
-import { Eye, EyeOff, HelpCircle } from 'lucide-react';
+import { Eye, EyeOff, HelpCircle, Info } from 'lucide-react';
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -261,7 +262,51 @@ const Register = () => {
 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="password" className="text-gray-800 dark:text-gray-200 font-medium font-syne">Password*</Label>
+                    <div className="flex items-center space-x-2">
+                      <Label htmlFor="password" className="text-gray-800 dark:text-gray-200 font-medium font-syne">Password*</Label>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="h-4 w-4 text-gray-500 dark:text-gray-400 cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent side="right" className="max-w-xs">
+                            <div className="text-xs space-y-1">
+                              <p className="font-medium mb-2">Password must contain:</p>
+                              <div className="flex items-center space-x-2">
+                                <span className={formData.password && passwordStrength.requirements.length ? "text-green-500" : "text-gray-400"}>
+                                  {formData.password && passwordStrength.requirements.length ? "✓" : "•"}
+                                </span>
+                                <span>8+ characters</span>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <span className={formData.password && passwordStrength.requirements.uppercase ? "text-green-500" : "text-gray-400"}>
+                                  {formData.password && passwordStrength.requirements.uppercase ? "✓" : "•"}
+                                </span>
+                                <span>Uppercase letter</span>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <span className={formData.password && passwordStrength.requirements.lowercase ? "text-green-500" : "text-gray-400"}>
+                                  {formData.password && passwordStrength.requirements.lowercase ? "✓" : "•"}
+                                </span>
+                                <span>Lowercase letter</span>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <span className={formData.password && passwordStrength.requirements.number ? "text-green-500" : "text-gray-400"}>
+                                  {formData.password && passwordStrength.requirements.number ? "✓" : "•"}
+                                </span>
+                                <span>Number</span>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <span className={formData.password && passwordStrength.requirements.special ? "text-green-500" : "text-gray-400"}>
+                                  {formData.password && passwordStrength.requirements.special ? "✓" : "•"}
+                                </span>
+                                <span>Special character (!@#$%^&*)</span>
+                              </div>
+                            </div>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
                     {formData.password && (
                       <div className="flex items-center space-x-1">
                         <div className="flex space-x-1">
@@ -283,42 +328,6 @@ const Register = () => {
                         </span>
                       </div>
                     )}
-                  </div>
-
-                  <div className="mb-2">
-                    <div className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
-                      <p className="mb-2 font-medium">Password must contain:</p>
-                      <div className="flex items-center space-x-2">
-                        <span className={formData.password && passwordStrength.requirements.length ? "text-green-500" : "text-gray-400"}>
-                          {formData.password && passwordStrength.requirements.length ? "✓" : "•"}
-                        </span>
-                        <span>8+ characters</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <span className={formData.password && passwordStrength.requirements.uppercase ? "text-green-500" : "text-gray-400"}>
-                          {formData.password && passwordStrength.requirements.uppercase ? "✓" : "•"}
-                        </span>
-                        <span>Uppercase letter</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <span className={formData.password && passwordStrength.requirements.lowercase ? "text-green-500" : "text-gray-400"}>
-                          {formData.password && passwordStrength.requirements.lowercase ? "✓" : "•"}
-                        </span>
-                        <span>Lowercase letter</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <span className={formData.password && passwordStrength.requirements.number ? "text-green-500" : "text-gray-400"}>
-                          {formData.password && passwordStrength.requirements.number ? "✓" : "•"}
-                        </span>
-                        <span>Number</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <span className={formData.password && passwordStrength.requirements.special ? "text-green-500" : "text-gray-400"}>
-                          {formData.password && passwordStrength.requirements.special ? "✓" : "•"}
-                        </span>
-                        <span>Special character (!@#$%^&*)</span>
-                      </div>
-                    </div>
                   </div>
 
                   <div className="relative overflow-hidden rounded-md">

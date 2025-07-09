@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -31,12 +30,12 @@ const Login = () => {
     // Load remembered email if available
     const rememberedEmail = localStorage.getItem('rememberedEmail');
     const storedHint = localStorage.getItem('passwordHint');
-    
+
     if (rememberedEmail) {
       setFormData(prev => ({ ...prev, email: rememberedEmail }));
       setRememberMe(true);
     }
-    
+
     if (storedHint) {
       setPasswordHint(storedHint);
     }
@@ -44,7 +43,7 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Email validation
     if (!validateEmail(formData.email)) {
       setEmailError('Please enter a valid email address');
@@ -52,36 +51,37 @@ const Login = () => {
     }
 
     setIsLoading(true);
-    
+
     console.log('Login attempt:', { email: formData.email });
-    
+
     try {
-      // First check if email is registered
-      const { data: userData, error: userError } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('email', formData.email)
-        .single();
-
-      if (userError && userError.code === 'PGRST116') {
-        // Email not found in profiles
-        toast({
-          title: "Email Not Registered",
-          description: "This email address is not registered. Please enter a registered email address.",
-          variant: "destructive",
-        });
-        setIsLoading(false);
-        return;
-      }
-
+      // Try to sign in first
       const { data, error } = await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.password,
       });
 
+      // If sign in fails, check if it's because email doesn't exist
       if (error) {
+        // Test if email exists by attempting to send a password reset
+        const { error: resetError } = await supabase.auth.resetPasswordForEmail(formData.email, {
+          redirectTo: 'https://example.com/dummy'  // dummy URL, we just want to test email existence
+        });
+
+        // If resetPasswordForEmail succeeds but login failed, it means email exists but password is wrong
+        // If resetPasswordForEmail fails with user not found, email doesn't exist
+        if (resetError && (resetError.message.includes('User not found') || resetError.message.includes('Unable to validate email address'))) {
+          toast({
+            title: "Email Not Registered",
+            description: "This email address is not registered. Please enter a registered email address.",
+            variant: "destructive",
+          });
+          setIsLoading(false);
+          return;
+        }
+
         console.error('Login error:', error);
-        
+
         // Increment password attempts for wrong password
         if (error.message.includes('Invalid login credentials') || error.message.includes('password')) {
           setPasswordAttempts(prev => {
@@ -92,7 +92,7 @@ const Login = () => {
             return newAttempts;
           });
         }
-        
+
         // Specific error messages
         let errorMessage = error.message;
         if (error.message.includes('Invalid login credentials')) {
@@ -102,7 +102,7 @@ const Login = () => {
         } else if (error.message.includes('User not found')) {
           errorMessage = 'Email address not registered. Please enter a registered email address.';
         }
-        
+
         toast({
           title: "Login Failed",
           description: errorMessage,
@@ -125,7 +125,7 @@ const Login = () => {
         title: "Login Successful",
         description: "Welcome back!",
       });
-      
+
       // Redirect to application form
       navigate('/application');
     } catch (error) {
@@ -178,7 +178,7 @@ const Login = () => {
           }}
         />
       </div>
-      
+
       {/* Floating Geometric Shapes */}
       <div className="absolute top-20 left-20 w-32 h-32 opacity-20">
         <div 
@@ -190,7 +190,7 @@ const Login = () => {
           }}
         />
       </div>
-      
+
       <div className="absolute top-40 right-32 w-40 h-40 opacity-15">
         <div 
           className="w-full h-full"
@@ -201,7 +201,7 @@ const Login = () => {
           }}
         />
       </div>
-      
+
       <div className="absolute bottom-32 left-40 w-36 h-36 opacity-20">
         <div 
           className="w-full h-full"
@@ -212,7 +212,7 @@ const Login = () => {
           }}
         />
       </div>
-      
+
       <div className="absolute bottom-20 right-20 w-28 h-28 opacity-25">
         <div 
           className="w-full h-full"
