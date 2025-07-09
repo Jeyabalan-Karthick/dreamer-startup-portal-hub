@@ -1,29 +1,68 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { validateEmail, checkPasswordStrength, validatePassword } from "@/lib/validation-utils";
+import { Eye, EyeOff, HelpCircle } from 'lucide-react';
 
 const Register = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    passwordHint: ''
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [emailError, setEmailError] = useState('');
+  const [passwordStrength, setPasswordStrength] = useState(checkPasswordStrength(''));
+
+  useEffect(() => {
+    setPasswordStrength(checkPasswordStrength(formData.password));
+  }, [formData.password]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Email validation
+    if (!validateEmail(formData.email)) {
+      setEmailError('Please enter a valid email address (lowercase, @gmail.com format)');
+      return;
+    }
+
+    // Password validation
+    const passwordValidation = validatePassword(formData.password);
+    if (!passwordValidation.isValid) {
+      toast({
+        title: "Password Error",
+        description: passwordValidation.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (formData.password !== formData.confirmPassword) {
       toast({
         title: "Error",
         description: "Passwords don't match",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!formData.passwordHint.trim()) {
+      toast({
+        title: "Error",
+        description: "Please provide a password hint",
         variant: "destructive",
       });
       return;
@@ -53,6 +92,12 @@ const Register = () => {
         return;
       }
 
+      // Store password hint and remember me preference
+      if (rememberMe) {
+        localStorage.setItem('rememberedEmail', formData.email);
+        localStorage.setItem('passwordHint', formData.passwordHint);
+      }
+
       console.log('Registration successful:', data);
       
       if (data.user && !data.user.email_confirmed_at) {
@@ -80,11 +125,56 @@ const Register = () => {
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [name]: value
     }));
+
+    // Clear email error when user starts typing
+    if (name === 'email' && emailError) {
+      setEmailError('');
+    }
   };
+
+  const PasswordStrengthIndicator = () => (
+    <div className="mt-2">
+      <div className="flex items-center justify-between text-sm mb-1">
+        <span className="text-gray-600">Password strength:</span>
+        <span style={{ color: passwordStrength.color }} className="font-medium">
+          {passwordStrength.label}
+        </span>
+      </div>
+      <div className="w-full bg-gray-200 rounded-full h-2">
+        <div
+          className="h-2 rounded-full transition-all duration-300"
+          style={{
+            backgroundColor: passwordStrength.color,
+            width: `${(passwordStrength.score / 3) * 100}%`
+          }}
+        />
+      </div>
+      <div className="mt-2 text-xs text-gray-600">
+        <div className="grid grid-cols-2 gap-1">
+          <div className={passwordStrength.requirements.length ? 'text-green-600' : 'text-red-500'}>
+            ✓ 8+ characters
+          </div>
+          <div className={passwordStrength.requirements.uppercase ? 'text-green-600' : 'text-red-500'}>
+            ✓ Uppercase letter
+          </div>
+          <div className={passwordStrength.requirements.lowercase ? 'text-green-600' : 'text-red-500'}>
+            ✓ Lowercase letter
+          </div>
+          <div className={passwordStrength.requirements.number ? 'text-green-600' : 'text-red-500'}>
+            ✓ Number
+          </div>
+          <div className={passwordStrength.requirements.special ? 'text-green-600' : 'text-red-500'}>
+            ✓ Special character
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen relative overflow-hidden" style={{
@@ -166,10 +256,13 @@ const Register = () => {
                       required
                       value={formData.email}
                       onChange={handleInputChange}
-                      className="h-12 border-gray-300 focus:border-gray-900 bg-white font-syne relative"
-                      placeholder="Enter your email"
+                      className={`h-12 border-gray-300 focus:border-gray-900 bg-white font-syne relative ${emailError ? 'border-red-500' : ''}`}
+                      placeholder="Enter your email (e.g., user@gmail.com)"
                     />
                   </div>
+                  {emailError && (
+                    <p className="text-red-500 text-sm mt-1">{emailError}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -178,15 +271,22 @@ const Register = () => {
                     <Input
                       id="password"
                       name="password"
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       required
                       value={formData.password}
                       onChange={handleInputChange}
-                      className="h-12 border-gray-300 focus:border-gray-900 bg-white font-syne relative"
+                      className="h-12 border-gray-300 focus:border-gray-900 bg-white font-syne relative pr-10"
                       placeholder="Create a password"
-                      showPasswordToggle
                     />
+                    <button
+                      type="button"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
                   </div>
+                  {formData.password && <PasswordStrengthIndicator />}
                 </div>
 
                 <div className="space-y-2">
@@ -195,15 +295,49 @@ const Register = () => {
                     <Input
                       id="confirmPassword"
                       name="confirmPassword"
-                      type="password"
+                      type={showConfirmPassword ? "text" : "password"}
                       required
                       value={formData.confirmPassword}
                       onChange={handleInputChange}
-                      className="h-12 border-gray-300 focus:border-gray-900 bg-white font-syne relative"
+                      className="h-12 border-gray-300 focus:border-gray-900 bg-white font-syne relative pr-10"
                       placeholder="Confirm your password"
-                      showPasswordToggle
+                    />
+                    <button
+                      type="button"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    >
+                      {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="passwordHint" className="text-gray-800 font-medium font-syne">Password Hint*</Label>
+                  <div className="relative overflow-hidden rounded-md">
+                    <Input
+                      id="passwordHint"
+                      name="passwordHint"
+                      type="text"
+                      required
+                      value={formData.passwordHint}
+                      onChange={handleInputChange}
+                      className="h-12 border-gray-300 focus:border-gray-900 bg-white font-syne relative"
+                      placeholder="Enter a hint to remember your password"
                     />
                   </div>
+                  <p className="text-xs text-gray-500">This hint will help you remember your password during login</p>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="rememberMe"
+                    checked={rememberMe}
+                    onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                  />
+                  <Label htmlFor="rememberMe" className="text-sm font-medium text-gray-700 font-syne">
+                    Remember me on this device
+                  </Label>
                 </div>
 
                 <Button 

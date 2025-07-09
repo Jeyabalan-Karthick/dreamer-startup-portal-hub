@@ -1,12 +1,15 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { validateEmail } from "@/lib/validation-utils";
+import { Eye, EyeOff, HelpCircle } from 'lucide-react';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -15,9 +18,36 @@ const Login = () => {
     password: ''
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showHint, setShowHint] = useState(false);
+  const [passwordHint, setPasswordHint] = useState('');
+  const [emailError, setEmailError] = useState('');
+
+  useEffect(() => {
+    // Load remembered email if available
+    const rememberedEmail = localStorage.getItem('rememberedEmail');
+    const storedHint = localStorage.getItem('passwordHint');
+    
+    if (rememberedEmail) {
+      setFormData(prev => ({ ...prev, email: rememberedEmail }));
+      setRememberMe(true);
+    }
+    
+    if (storedHint) {
+      setPasswordHint(storedHint);
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Email validation
+    if (!validateEmail(formData.email)) {
+      setEmailError('Please enter a valid email address (lowercase, @gmail.com format)');
+      return;
+    }
+
     setIsLoading(true);
     
     console.log('Login attempt:', { email: formData.email });
@@ -36,6 +66,14 @@ const Login = () => {
           variant: "destructive",
         });
         return;
+      }
+
+      // Handle remember me
+      if (rememberMe) {
+        localStorage.setItem('rememberedEmail', formData.email);
+      } else {
+        localStorage.removeItem('rememberedEmail');
+        localStorage.removeItem('passwordHint');
       }
 
       console.log('Login successful:', data);
@@ -59,10 +97,20 @@ const Login = () => {
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [name]: value
     }));
+
+    // Clear email error when user starts typing
+    if (name === 'email' && emailError) {
+      setEmailError('');
+    }
+  };
+
+  const toggleHint = () => {
+    setShowHint(!showHint);
   };
 
   return (
@@ -145,10 +193,13 @@ const Login = () => {
                       required
                       value={formData.email}
                       onChange={handleInputChange}
-                      className="h-12 border-gray-300 focus:border-gray-900 bg-white font-syne relative"
-                      placeholder="Enter your email"
+                      className={`h-12 border-gray-300 focus:border-gray-900 bg-white font-syne relative ${emailError ? 'border-red-500' : ''}`}
+                      placeholder="Enter your email (e.g., user@gmail.com)"
                     />
                   </div>
+                  {emailError && (
+                    <p className="text-red-500 text-sm mt-1">{emailError}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -157,15 +208,56 @@ const Login = () => {
                     <Input
                       id="password"
                       name="password"
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       required
                       value={formData.password}
                       onChange={handleInputChange}
-                      className="h-12 border-gray-300 focus:border-gray-900 bg-white font-syne relative"
-                      placeholder="Create a password"
-                      showPasswordToggle
+                      className="h-12 border-gray-300 focus:border-gray-900 bg-white font-syne relative pr-10"
+                      placeholder="Enter your password"
                     />
+                    <button
+                      type="button"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
                   </div>
+
+                  {/* Password Hint Section */}
+                  {passwordHint && (
+                    <div className="mt-2">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="showHint"
+                          checked={showHint}
+                          onCheckedChange={(checked) => setShowHint(checked as boolean)}
+                        />
+                        <Label htmlFor="showHint" className="text-sm text-gray-600 font-syne flex items-center">
+                          <HelpCircle className="h-4 w-4 mr-1" />
+                          Show password hint
+                        </Label>
+                      </div>
+                      {showHint && (
+                        <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                          <p className="text-sm text-blue-800 font-syne">
+                            <strong>Hint:</strong> {passwordHint}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="rememberMe"
+                    checked={rememberMe}
+                    onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                  />
+                  <Label htmlFor="rememberMe" className="text-sm font-medium text-gray-700 font-syne">
+                    Remember me on this device
+                  </Label>
                 </div>
 
                 <Button 
