@@ -384,4 +384,3 @@ const Register = () => {
 };
 
 export default Register;
-```Fixing dark mode styling for password inputs and icons.
