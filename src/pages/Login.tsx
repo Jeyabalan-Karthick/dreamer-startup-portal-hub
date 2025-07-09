@@ -55,31 +55,42 @@ const Login = () => {
     console.log('Login attempt:', { email: formData.email });
 
     try {
-      // Try to sign in first
+      // First check if email is registered in profiles table
+      const { data: existingUser, error: checkError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', formData.email)
+        .single();
+
+      if (checkError && checkError.code === 'PGRST116') {
+        // Email not found in profiles
+        toast({
+          title: "Email Not Registered",
+          description: "This email address is not registered. Please enter a registered email address.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      if (checkError) {
+        console.error('Profile check error:', checkError);
+        toast({
+          title: "Login Failed",
+          description: "An error occurred while checking your account",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      // Email exists, now try to sign in
       const { data, error } = await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.password,
       });
 
-      // If sign in fails, check if it's because email doesn't exist
       if (error) {
-        // Test if email exists by attempting to send a password reset
-        const { error: resetError } = await supabase.auth.resetPasswordForEmail(formData.email, {
-          redirectTo: 'https://example.com/dummy'  // dummy URL, we just want to test email existence
-        });
-
-        // If resetPasswordForEmail succeeds but login failed, it means email exists but password is wrong
-        // If resetPasswordForEmail fails with user not found, email doesn't exist
-        if (resetError && (resetError.message.includes('User not found') || resetError.message.includes('Unable to validate email address'))) {
-          toast({
-            title: "Email Not Registered",
-            description: "This email address is not registered. Please enter a registered email address.",
-            variant: "destructive",
-          });
-          setIsLoading(false);
-          return;
-        }
-
         console.error('Login error:', error);
 
         // Increment password attempts for wrong password
@@ -99,8 +110,6 @@ const Login = () => {
           errorMessage = 'Password is wrong. Please try again.';
         } else if (error.message.includes('Email not confirmed')) {
           errorMessage = 'Please verify your email address before logging in.';
-        } else if (error.message.includes('User not found')) {
-          errorMessage = 'Email address not registered. Please enter a registered email address.';
         }
 
         toast({
