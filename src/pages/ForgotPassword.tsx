@@ -184,7 +184,7 @@ const ForgotPassword = () => {
               {step === 'email' ? (
                 <form onSubmit={handleEmailSubmit} className="space-y-6">
                   <div className="space-y-2">
-                    <Label htmlFor="email" className="text-gray-800 font-medium font-syne">Email address*</Label>
+                    <Label htmlFor="email" className="text-gray-800 dark:text-gray-200 font-medium font-syne">Email address*</Label>
                     <div className="relative overflow-hidden rounded-md">
                       <Input
                         id="email"
@@ -193,7 +193,7 @@ const ForgotPassword = () => {
                         required
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="h-12 border-gray-300 focus:border-gray-900 bg-white font-syne relative"
+                        className="h-12 border-gray-300 dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-300 bg-white dark:bg-gray-800 dark:text-gray-100 font-syne relative"
                         placeholder="Enter your email"
                       />
                     </div>
@@ -210,7 +210,7 @@ const ForgotPassword = () => {
               ) : (
                 <form onSubmit={handleOtpSubmit} className="space-y-6">
                   <div className="space-y-2">
-                    <Label htmlFor="otp" className="text-gray-800 font-medium font-syne">Verification Code*</Label>
+                    <Label htmlFor="otp" className="text-gray-800 dark:text-gray-200 font-medium font-syne">Verification Code*</Label>
                     <div className="flex justify-center">
                       <InputOTP
                         value={otp}
@@ -219,16 +219,16 @@ const ForgotPassword = () => {
                         className="font-syne"
                       >
                         <InputOTPGroup>
-                          <InputOTPSlot index={0} className="w-12 h-12 text-lg font-syne border-gray-300 focus:border-gray-900" />
-                          <InputOTPSlot index={1} className="w-12 h-12 text-lg font-syne border-gray-300 focus:border-gray-900" />
-                          <InputOTPSlot index={2} className="w-12 h-12 text-lg font-syne border-gray-300 focus:border-gray-900" />
-                          <InputOTPSlot index={3} className="w-12 h-12 text-lg font-syne border-gray-300 focus:border-gray-900" />
-                          <InputOTPSlot index={4} className="w-12 h-12 text-lg font-syne border-gray-300 focus:border-gray-900" />
-                          <InputOTPSlot index={5} className="w-12 h-12 text-lg font-syne border-gray-300 focus:border-gray-900" />
+                          <InputOTPSlot index={0} className="w-12 h-12 text-lg font-syne border-gray-300 dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-300 bg-white dark:bg-gray-800 dark:text-gray-100" />
+                          <InputOTPSlot index={1} className="w-12 h-12 text-lg font-syne border-gray-300 dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-300 bg-white dark:bg-gray-800 dark:text-gray-100" />
+                          <InputOTPSlot index={2} className="w-12 h-12 text-lg font-syne border-gray-300 dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-300 bg-white dark:bg-gray-800 dark:text-gray-100" />
+                          <InputOTPSlot index={3} className="w-12 h-12 text-lg font-syne border-gray-300 dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-300 bg-white dark:bg-gray-800 dark:text-gray-100" />
+                          <InputOTPSlot index={4} className="w-12 h-12 text-lg font-syne border-gray-300 dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-300 bg-white dark:bg-gray-800 dark:text-gray-100" />
+                          <InputOTPSlot index={5} className="w-12 h-12 text-lg font-syne border-gray-300 dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-300 bg-white dark:bg-gray-800 dark:text-gray-100" />
                         </InputOTPGroup>
                       </InputOTP>
                     </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 text-center font-syne">
+                    <p className="text-sm text-gray-600 dark:text-gray-300 text-center font-syne">
                       Code sent to {email}
                     </p>
                   </div>
@@ -245,7 +245,7 @@ const ForgotPassword = () => {
                     <button
                       type="button"
                       onClick={() => setStep('email')}
-                      className="text-blue-600 hover:underline font-medium font-syne"
+                      className="text-blue-600 dark:text-blue-400 hover:underline font-medium font-syne"
                     >
                       ← Back to Email
                     </button>
@@ -258,7 +258,7 @@ const ForgotPassword = () => {
                   Remember your password?{' '}
                   <button
                     onClick={() => navigate('/login')}
-                    className="text-blue-600 hover:underline font-medium font-syne"
+                    className="text-blue-600 dark:text-blue-400 hover:underline font-medium font-syne"
                   >
                     Back to Login
                   </button>
