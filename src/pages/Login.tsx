@@ -225,28 +225,32 @@ const Login = () => {
                   </div>
 
                   {/* Password Hint Section */}
-                  {passwordHint && (
-                    <div className="mt-2">
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id="showHint"
-                          checked={showHint}
-                          onCheckedChange={(checked) => setShowHint(checked as boolean)}
-                        />
-                        <Label htmlFor="showHint" className="text-sm text-gray-600 font-syne flex items-center">
-                          <HelpCircle className="h-4 w-4 mr-1" />
-                          Show password hint
-                        </Label>
-                      </div>
-                      {showHint && (
-                        <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                  <div className="mt-2">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="showHint"
+                        checked={showHint}
+                        onCheckedChange={(checked) => setShowHint(checked as boolean)}
+                      />
+                      <Label htmlFor="showHint" className="text-sm text-gray-600 font-syne flex items-center">
+                        <HelpCircle className="h-4 w-4 mr-1" />
+                        Show password hint
+                      </Label>
+                    </div>
+                    {showHint && (
+                      <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                        {passwordHint ? (
                           <p className="text-sm text-blue-800 font-syne">
                             <strong>Hint:</strong> {passwordHint}
                           </p>
-                        </div>
-                      )}
-                    </div>
-                  )}
+                        ) : (
+                          <p className="text-sm text-gray-600 font-syne">
+                            No password hint available. You can set one during registration.
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="flex items-center space-x-2">
