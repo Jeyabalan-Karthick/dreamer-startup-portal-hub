@@ -21,9 +21,12 @@ const ForgotPassword = () => {
     setIsLoading(true);
     
     try {
-      // Send password reset OTP to email
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: undefined // This prevents redirect and enables OTP flow
+      // Send 6-digit OTP to email for password reset
+      const { error } = await supabase.auth.signInWithOtp({
+        email: email,
+        options: {
+          shouldCreateUser: false // Only send OTP if email exists
+        }
       });
 
       if (error) {
@@ -71,7 +74,7 @@ const ForgotPassword = () => {
       const { error } = await supabase.auth.verifyOtp({
         email,
         token: otp,
-        type: 'recovery'
+        type: 'email'
       });
 
       if (error) {
