@@ -10,6 +10,7 @@ import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { validateEmail } from "@/lib/validation-utils";
 import { Eye, EyeOff, HelpCircle } from 'lucide-react';
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -114,9 +115,8 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden" style={{
-      background: 'linear-gradient(135deg, #e5e7eb 0%, #f3f4f6 50%, #e5e7eb 100%)'
-    }}>
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <ThemeToggle />
       {/* Dotted Pattern Background */}
       <div className="absolute inset-0 opacity-30">
         <div 
@@ -177,14 +177,14 @@ const Login = () => {
       {/* Main Content */}
       <div className="relative z-10 min-h-screen flex items-center justify-center p-4 font-syne">
         <div className="w-full max-w-md">
-          <Card className="border-0 shadow-2xl bg-white/90 backdrop-blur-sm">
+          <Card className="border-0 shadow-2xl bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm">
             <CardHeader className="text-center pb-8">
-              <CardTitle className="text-4xl font-bold text-gray-900 mb-2 font-syne">Log In</CardTitle>
+              <CardTitle className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2 font-syne">Log In</CardTitle>
             </CardHeader>
             <CardContent className="px-8 pb-8">
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-gray-800 font-medium font-syne">Email address*</Label>
+                  <Label htmlFor="email" className="text-gray-800 dark:text-gray-200 font-medium font-syne">Email address*</Label>
                   <div className="relative overflow-hidden rounded-md">
                     <Input
                       id="email"
@@ -193,7 +193,7 @@ const Login = () => {
                       required
                       value={formData.email}
                       onChange={handleInputChange}
-                      className={`h-12 border-gray-300 focus:border-gray-900 bg-white font-syne relative ${emailError ? 'border-red-500' : ''}`}
+                      className={`h-12 border-gray-300 dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-300 bg-white dark:bg-gray-800 dark:text-gray-100 font-syne relative ${emailError ? 'border-red-500' : ''}`}
                       placeholder="Enter your email (e.g., user@gmail.com)"
                     />
                   </div>
@@ -203,7 +203,7 @@ const Login = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="text-gray-800 font-medium font-syne">Password*</Label>
+                  <Label htmlFor="password" className="text-gray-800 dark:text-gray-200 font-medium font-syne">Password*</Label>
                   <div className="relative overflow-hidden rounded-md">
                     <Input
                       id="password"
@@ -212,7 +212,7 @@ const Login = () => {
                       required
                       value={formData.password}
                       onChange={handleInputChange}
-                      className="h-12 border-gray-300 focus:border-gray-900 bg-white font-syne relative pr-10"
+                      className="h-12 border-gray-300 dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-300 bg-white dark:bg-gray-800 dark:text-gray-100 font-syne relative pr-10"
                       placeholder="Enter your password"
                     />
                     <button
@@ -275,7 +275,7 @@ const Login = () => {
 
               <div className="mt-6 text-center">
                 <button
-                  onClick={() => navigate('/forgot-password')}
+                  onClick={() => navigate('/forgot-password', { state: { email: formData.email } })}
                   className="text-blue-600 hover:underline font-medium font-syne text-sm"
                 >
                   Forgot your password?

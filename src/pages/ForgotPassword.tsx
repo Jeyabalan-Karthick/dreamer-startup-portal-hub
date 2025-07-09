@@ -1,6 +1,6 @@
 
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,13 +8,22 @@ import { Label } from "@/components/ui/label";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [step, setStep] = useState<'email' | 'otp'>('email');
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    // Prefill email if coming from login page
+    if (location.state?.email) {
+      setEmail(location.state.email);
+    }
+  }, [location.state]);
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -98,9 +107,8 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden" style={{
-      background: 'linear-gradient(135deg, #e5e7eb 0%, #f3f4f6 50%, #e5e7eb 100%)'
-    }}>
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <ThemeToggle />
       {/* Dotted Pattern Background */}
       <div className="absolute inset-0 opacity-30">
         <div 
@@ -161,9 +169,9 @@ const ForgotPassword = () => {
       {/* Main Content */}
       <div className="relative z-10 min-h-screen flex items-center justify-center p-4 font-syne">
         <div className="w-full max-w-md">
-          <Card className="border-0 shadow-2xl bg-white/90 backdrop-blur-sm">
+          <Card className="border-0 shadow-2xl bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm">
             <CardHeader className="text-center pb-8">
-              <CardTitle className="text-4xl font-bold text-gray-900 mb-2 font-syne">
+              <CardTitle className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2 font-syne">
                 {step === 'email' ? 'Forgot Password' : 'Verify OTP'}
               </CardTitle>
               <p className="text-gray-600 font-syne">

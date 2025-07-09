@@ -10,6 +10,7 @@ import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { validateEmail, checkPasswordStrength, validatePassword } from "@/lib/validation-utils";
 import { Eye, EyeOff, HelpCircle } from 'lucide-react';
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -140,9 +141,8 @@ const Register = () => {
   
 
   return (
-    <div className="min-h-screen relative overflow-hidden" style={{
-      background: 'linear-gradient(135deg, #e5e7eb 0%, #f3f4f6 50%, #e5e7eb 100%)'
-    }}>
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <ThemeToggle />
       {/* Dotted Pattern Background */}
       <div className="absolute inset-0 opacity-30">
         <div 
@@ -203,9 +203,9 @@ const Register = () => {
       {/* Main Content */}
       <div className="relative z-10 min-h-screen flex items-center justify-center p-4 font-syne">
         <div className="w-full max-w-md">
-          <Card className="border-0 shadow-2xl bg-white/90 backdrop-blur-sm">
+          <Card className="border-0 shadow-2xl bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm">
             <CardHeader className="text-center pb-8">
-              <CardTitle className="text-4xl font-bold text-gray-900 mb-2 font-syne">Sign Up</CardTitle>
+              <CardTitle className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2 font-syne">Sign Up</CardTitle>
             </CardHeader>
             <CardContent className="px-8 pb-8">
               <form onSubmit={handleSubmit} className="space-y-6">
