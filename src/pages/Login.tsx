@@ -47,7 +47,7 @@ const Login = () => {
     
     // Email validation
     if (!validateEmail(formData.email)) {
-      setEmailError('Please enter a valid email address (lowercase, @gmail.com format)');
+      setEmailError('Please enter a valid email address');
       return;
     }
 
@@ -131,7 +131,7 @@ const Login = () => {
     // Real-time email validation
     if (name === 'email') {
       if (value.length > 0 && !validateEmail(value)) {
-        setEmailError('Please enter a valid email address (lowercase, @gmail.com format)');
+        setEmailError('Please enter a valid email address');
       } else {
         setEmailError('');
       }

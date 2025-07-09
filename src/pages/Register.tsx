@@ -134,7 +134,7 @@ const Register = () => {
     // Real-time email validation
     if (name === 'email') {
       if (value.length > 0 && !validateEmail(value)) {
-        setEmailError('Please enter a valid email address (lowercase, @gmail.com format)');
+        setEmailError('Please enter a valid email address');
       } else {
         setEmailError('');
       }
@@ -223,7 +223,7 @@ const Register = () => {
                       value={formData.email}
                       onChange={handleInputChange}
                       className={`h-12 border-gray-300 dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-300 bg-white dark:bg-gray-800 dark:text-gray-100 font-syne relative ${emailError ? 'border-red-500' : ''}`}
-                      placeholder="Enter your email (e.g., user@gmail.com)"
+                      placeholder="Enter your email "
                     />
                   </div>
                   {emailError && (
