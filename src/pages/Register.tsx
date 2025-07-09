@@ -72,6 +72,24 @@ const Register = () => {
     console.log('Registration attempt:', { email: formData.email });
 
     try {
+      // First check if email is already registered
+      const { data: existingUser, error: checkError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', formData.email)
+        .single();
+
+      if (existingUser) {
+        // Email is already registered
+        toast({
+          title: "Email Already Registered",
+          description: "This email address is already registered. Please enter a different email address.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+
       const redirectUrl = "https://dreamer-startup-portal-hub.vercel.app/login";
 
       const { data, error } = await supabase.auth.signUp({
@@ -84,11 +102,21 @@ const Register = () => {
 
       if (error) {
         console.error('Registration error:', error);
-        toast({
-          title: "Registration Failed",
-          description: error.message,
-          variant: "destructive",
-        });
+        
+        // Handle specific error for already registered email
+        if (error.message.includes('User already registered')) {
+          toast({
+            title: "Email Already Registered",
+            description: "This email address is already registered. Please enter a different email address.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Registration Failed",
+            description: error.message,
+            variant: "destructive",
+          });
+        }
         return;
       }
 
