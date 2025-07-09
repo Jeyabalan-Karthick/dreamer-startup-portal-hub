@@ -201,7 +201,7 @@ const ForgotPassword = () => {
 
                   <Button 
                     type="submit" 
-                    className="w-full h-12 bg-gray-900 hover:bg-gray-800 text-white font-medium text-lg rounded-md mt-8 font-syne"
+                    className="w-full h-12 bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-100 text-white dark:text-gray-900 font-medium text-lg rounded-md mt-8 font-syne transition-colors duration-200 shadow-lg hover:shadow-xl"
                     disabled={isLoading}
                   >
                     {isLoading ? 'Sending...' : 'Send OTP →'}
@@ -235,7 +235,7 @@ const ForgotPassword = () => {
 
                   <Button 
                     type="submit" 
-                    className="w-full h-12 bg-gray-900 hover:bg-gray-800 text-white font-medium text-lg rounded-md mt-8 font-syne"
+                    className="w-full h-12 bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-100 text-white dark:text-gray-900 font-medium text-lg rounded-md mt-8 font-syne transition-colors duration-200 shadow-lg hover:shadow-xl"
                     disabled={isLoading}
                   >
                     {isLoading ? 'Verifying...' : 'Verify OTP →'}
@@ -245,7 +245,7 @@ const ForgotPassword = () => {
                     <button
                       type="button"
                       onClick={() => setStep('email')}
-                      className="text-blue-600 dark:text-blue-400 hover:underline font-medium font-syne"
+                      className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline font-medium font-syne transition-colors duration-200"
                     >
                       ← Back to Email
                     </button>
@@ -258,7 +258,7 @@ const ForgotPassword = () => {
                   Remember your password?{' '}
                   <button
                     onClick={() => navigate('/login')}
-                    className="text-blue-600 dark:text-blue-400 hover:underline font-medium font-syne"
+                    className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline font-medium font-syne transition-colors duration-200"
                   >
                     Back to Login
                   </button>

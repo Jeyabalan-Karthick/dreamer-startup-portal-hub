@@ -266,7 +266,7 @@ const Login = () => {
 
                 <Button 
                   type="submit" 
-                  className="w-full h-12 bg-gray-900 hover:bg-gray-800 text-white font-medium text-lg rounded-md mt-8 font-syne"
+                  className="w-full h-12 bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-100 text-white dark:text-gray-900 font-medium text-lg rounded-md mt-8 font-syne transition-colors duration-200 shadow-lg hover:shadow-xl"
                   disabled={isLoading}
                 >
                   {isLoading ? 'Signing In...' : 'Log in →'}
@@ -276,7 +276,7 @@ const Login = () => {
               <div className="mt-6 text-center">
                 <button
                   onClick={() => navigate('/forgot-password', { state: { email: formData.email } })}
-                  className="text-blue-600 hover:underline font-medium font-syne text-sm"
+                  className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline font-medium font-syne text-sm transition-colors duration-200"
                 >
                   Forgot your password?
                 </button>
@@ -287,7 +287,7 @@ const Login = () => {
                   Don't have an account?{' '}
                   <button
                     onClick={() => navigate('/register')}
-                    className="text-blue-600 hover:underline font-medium font-syne"
+                    className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline font-medium font-syne transition-colors duration-200"
                   >
                     Sign up
                   </button>
