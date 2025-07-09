@@ -209,7 +209,7 @@ const Register = () => {
             <CardContent className="px-8 pb-8">
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-gray-800 font-medium font-syne">Email address*</Label>
+                  <Label htmlFor="email" className="text-gray-800 dark:text-gray-200 font-medium font-syne">Email address*</Label>
                   <div className="relative overflow-hidden rounded-md">
                     <Input
                       id="email"
@@ -218,7 +218,7 @@ const Register = () => {
                       required
                       value={formData.email}
                       onChange={handleInputChange}
-                      className={`h-12 border-gray-300 focus:border-gray-900 bg-white font-syne relative ${emailError ? 'border-red-500' : ''}`}
+                      className={`h-12 border-gray-300 dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-300 bg-white dark:bg-gray-800 dark:text-gray-100 font-syne relative ${emailError ? 'border-red-500' : ''}`}
                       placeholder="Enter your email (e.g., user@gmail.com)"
                     />
                   </div>
@@ -229,35 +229,35 @@ const Register = () => {
 
                 <div className="space-y-2">
                   <div className="flex items-center space-x-2">
-                    <Label htmlFor="password" className="text-gray-800 font-medium font-syne">Password*</Label>
+                    <Label htmlFor="password" className="text-gray-800 dark:text-gray-200 font-medium font-syne">Password*</Label>
                     <div className="relative group">
-                      <HelpCircle className="h-4 w-4 text-gray-400 hover:text-gray-600 cursor-help" />
+                      <HelpCircle className="h-4 w-4 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 cursor-help" />
                       <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block z-50">
-                        <div className="bg-gray-900 text-white text-xs rounded-lg py-2 px-3 whitespace-nowrap shadow-lg">
+                        <div className="bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-xs rounded-lg py-2 px-3 whitespace-nowrap shadow-lg">
                           <div className="text-center mb-1 font-medium">Password Requirements:</div>
                           <div className="space-y-1">
                             <div className="flex items-center space-x-2">
-                              <span className="text-green-400">✓</span>
+                              <span className="text-green-400 dark:text-green-600">✓</span>
                               <span>8+ characters</span>
                             </div>
                             <div className="flex items-center space-x-2">
-                              <span className="text-green-400">✓</span>
+                              <span className="text-green-400 dark:text-green-600">✓</span>
                               <span>Uppercase letter</span>
                             </div>
                             <div className="flex items-center space-x-2">
-                              <span className="text-green-400">✓</span>
+                              <span className="text-green-400 dark:text-green-600">✓</span>
                               <span>Lowercase letter</span>
                             </div>
                             <div className="flex items-center space-x-2">
-                              <span className="text-green-400">✓</span>
+                              <span className="text-green-400 dark:text-green-600">✓</span>
                               <span>Number</span>
                             </div>
                             <div className="flex items-center space-x-2">
-                              <span className="text-green-400">✓</span>
+                              <span className="text-green-400 dark:text-green-600">✓</span>
                               <span>Special character</span>
                             </div>
                           </div>
-                          <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                          <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900 dark:border-t-gray-100"></div>
                         </div>
                       </div>
                     </div>
@@ -266,12 +266,12 @@ const Register = () => {
                   {formData.password && (
                     <div className="mb-2">
                       <div className="flex items-center justify-between text-sm mb-1">
-                        <span className="text-gray-600">Password strength:</span>
+                        <span className="text-gray-600 dark:text-gray-300">Password strength:</span>
                         <span style={{ color: passwordStrength.color }} className="font-medium">
                           {passwordStrength.label}
                         </span>
                       </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                         <div
                           className="h-2 rounded-full transition-all duration-300"
                           style={{
@@ -305,7 +305,7 @@ const Register = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="confirmPassword" className="text-gray-800 font-medium font-syne">Confirm Password*</Label>
+                  <Label htmlFor="confirmPassword" className="text-gray-800 dark:text-gray-200 font-medium font-syne">Confirm Password*</Label>
                   <div className="relative overflow-hidden rounded-md">
                     <Input
                       id="confirmPassword"
@@ -328,7 +328,7 @@ const Register = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="passwordHint" className="text-gray-800 font-medium font-syne">Password Hint*</Label>
+                  <Label htmlFor="passwordHint" className="text-gray-800 dark:text-gray-200 font-medium font-syne">Password Hint*</Label>
                   <div className="relative overflow-hidden rounded-md">
                     <Input
                       id="passwordHint"
@@ -337,11 +337,11 @@ const Register = () => {
                       required
                       value={formData.passwordHint}
                       onChange={handleInputChange}
-                      className="h-12 border-gray-300 focus:border-gray-900 bg-white font-syne relative"
+                      className="h-12 border-gray-300 dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-300 bg-white dark:bg-gray-800 dark:text-gray-100 font-syne relative"
                       placeholder="Enter a hint to remember your password"
                     />
                   </div>
-                  <p className="text-xs text-gray-500">This hint will help you remember your password during login</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">This hint will help you remember your password during login</p>
                 </div>
 
                 <div className="flex items-center space-x-2">
@@ -350,7 +350,7 @@ const Register = () => {
                     checked={rememberMe}
                     onCheckedChange={(checked) => setRememberMe(checked as boolean)}
                   />
-                  <Label htmlFor="rememberMe" className="text-sm font-medium text-gray-700 font-syne">
+                  <Label htmlFor="rememberMe" className="text-sm font-medium text-gray-700 dark:text-gray-300 font-syne">
                     Remember me 
                   </Label>
                 </div>
@@ -365,11 +365,11 @@ const Register = () => {
               </form>
 
               <div className="mt-8 text-center">
-                <p className="text-gray-600 font-syne">
+                <p className="text-gray-600 dark:text-gray-400 font-syne">
                   Already have an account?{' '}
                   <button
                     onClick={() => navigate('/login')}
-                    className="text-blue-600 hover:underline font-medium font-syne"
+                    className="text-blue-600 dark:text-blue-400 hover:underline font-medium font-syne"
                   >
                     Log in
                   </button>
