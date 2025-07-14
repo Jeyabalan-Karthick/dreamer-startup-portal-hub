@@ -1,7 +1,4 @@
-The code adds a skeleton loading screen to the landing page while it's loading, enhancing the user experience during initial load.
-```
 
-```replit_final_file
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LandingPage from '@/components/LandingPage';
@@ -28,7 +25,7 @@ const Index = () => {
       navigate(`/register?code=${couponCode}`);
     }
 
-    return () => clearTimeout(timer); // Cleanup the timer
+    return () => clearTimeout(timer);
   }, [navigate]);
 
   // Skeleton loading screen
