@@ -9,7 +9,7 @@ const Index = () => {
     // Check if there's a coupon code in the URL
     const urlParams = new URLSearchParams(window.location.search);
     const couponCode = urlParams.get('code');
-    
+
     if (couponCode) {
       // Redirect to register page with coupon code
       navigate(`/register?code=${couponCode}`);
