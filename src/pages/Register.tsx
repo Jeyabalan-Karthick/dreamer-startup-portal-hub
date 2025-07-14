@@ -11,6 +11,7 @@ import { validateEmail, checkPasswordStrength, validatePassword } from "@/lib/va
 import { Eye, EyeOff, HelpCircle, Info } from 'lucide-react';
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ const Register = () => {
     passwordHint: ''
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -30,6 +32,16 @@ const Register = () => {
   useEffect(() => {
     setPasswordStrength(checkPasswordStrength(formData.password));
   }, [formData.password]);
+
+  useEffect(() => {
+    const initializePage = async () => {
+      // Simulate loading time for smoother UX
+      await new Promise(resolve => setTimeout(resolve, 800));
+      setPageLoading(false);
+    };
+
+    initializePage();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -170,7 +182,126 @@ const Register = () => {
     }
   };
 
+  // Skeleton loading screen
+  if (pageLoading) {
+    return (
+      <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+        <ThemeToggle />
+        {/* Dotted Pattern Background */}
+        <div className="absolute inset-0 opacity-30">
+          <div 
+            className="w-full h-full"
+            style={{
+              backgroundImage: `radial-gradient(circle, #9ca3af 1px, transparent 1px)`,
+              backgroundSize: '20px 20px',
+              backgroundPosition: '0 0, 10px 10px'
+            }}
+          />
+        </div>
 
+        {/* Floating Geometric Shapes */}
+        <div className="absolute top-20 left-20 w-32 h-32 opacity-20">
+          <div 
+            className="w-full h-full"
+            style={{
+              backgroundImage: `radial-gradient(circle, #6b7280 2px, transparent 2px)`,
+              backgroundSize: '8px 8px',
+              clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)'
+            }}
+          />
+        </div>
+
+        <div className="absolute top-40 right-32 w-40 h-40 opacity-15">
+          <div 
+            className="w-full h-full"
+            style={{
+              backgroundImage: `radial-gradient(circle, #6b7280 2px, transparent 2px)`,
+              backgroundSize: '10px 10px',
+              clipPath: 'circle(50% at 50% 50%)'
+            }}
+          />
+        </div>
+
+        <div className="absolute bottom-32 left-40 w-36 h-36 opacity-20">
+          <div 
+            className="w-full h-full"
+            style={{
+              backgroundImage: `radial-gradient(circle, #6b7280 2px, transparent 2px)`,
+              backgroundSize: '8px 8px',
+              clipPath: 'polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%)'
+            }}
+          />
+        </div>
+
+        <div className="absolute bottom-20 right-20 w-28 h-28 opacity-25">
+          <div 
+            className="w-full h-full"
+            style={{
+              backgroundImage: `radial-gradient(circle, #6b7280 2px, transparent 2px)`,
+              backgroundSize: '6px 6px',
+              clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)'
+            }}
+          />
+        </div>
+
+        {/* Main Content Skeleton */}
+        <div className="relative z-10 min-h-screen flex items-center justify-center p-4 font-syne">
+          <div className="w-full max-w-md">
+            <Card className="border-0 shadow-2xl bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm">
+              <CardHeader className="text-center pb-8">
+                <Skeleton className="h-10 w-32 mx-auto mb-2" />
+              </CardHeader>
+              <CardContent className="px-8 pb-8">
+                <div className="space-y-6">
+                  {/* Email field skeleton */}
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-12 w-full" />
+                  </div>
+
+                  {/* Password field skeleton */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Skeleton className="h-4 w-20" />
+                      <Skeleton className="h-4 w-16" />
+                    </div>
+                    <Skeleton className="h-12 w-full" />
+                  </div>
+
+                  {/* Confirm Password field skeleton */}
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-28" />
+                    <Skeleton className="h-12 w-full" />
+                  </div>
+
+                  {/* Password Hint field skeleton */}
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-12 w-full" />
+                    <Skeleton className="h-3 w-64" />
+                  </div>
+
+                  {/* Remember me skeleton */}
+                  <div className="flex items-center space-x-2">
+                    <Skeleton className="h-4 w-4" />
+                    <Skeleton className="h-4 w-24" />
+                  </div>
+
+                  {/* Sign up button skeleton */}
+                  <Skeleton className="h-12 w-full" />
+                </div>
+
+                {/* Links skeleton */}
+                <div className="mt-8 text-center">
+                  <Skeleton className="h-4 w-48 mx-auto" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
