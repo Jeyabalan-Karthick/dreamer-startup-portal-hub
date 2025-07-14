@@ -66,36 +66,7 @@ const Login = () => {
     console.log('Login attempt:', { email: formData.email });
 
     try {
-      // First check if email is registered in profiles table
-      const { data: existingUser, error: checkError } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('email', formData.email)
-        .single();
-
-      if (checkError && checkError.code === 'PGRST116') {
-        // Email not found in profiles
-        toast({
-          title: "Email Not Registered",
-          description: "This email address is not registered. Please enter a registered email address.",
-          variant: "destructive",
-        });
-        setIsLoading(false);
-        return;
-      }
-
-      if (checkError) {
-        console.error('Profile check error:', checkError);
-        toast({
-          title: "Login Failed",
-          description: "An error occurred while checking your account",
-          variant: "destructive",
-        });
-        setIsLoading(false);
-        return;
-      }
-
-      // Email exists, now try to sign in
+      // Try to sign in directly and handle specific errors
       const { data, error } = await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.password,
@@ -104,8 +75,30 @@ const Login = () => {
       if (error) {
         console.error('Login error:', error);
 
-        // Increment password attempts for wrong password
-        if (error.message.includes('Invalid login credentials') || error.message.includes('password')) {
+        // Check if it's an invalid credentials error (could be wrong email or password)
+        if (error.message.includes('Invalid login credentials')) {
+          // Try to determine if email exists by attempting password reset (silent check)
+          try {
+            const { error: resetError } = await supabase.auth.resetPasswordForEmail(formData.email, {
+              redirectTo: 'https://dreamer-startup-portal-hub.vercel.app/reset-password'
+            });
+
+            // If reset email fails with user not found, email doesn't exist
+            if (resetError && (resetError.message.includes('User not found') || resetError.message.includes('Unable to validate email address'))) {
+              toast({
+                title: "Email Not Registered",
+                description: "This email address is not registered. Please enter a registered email address.",
+                variant: "destructive",
+              });
+              setIsLoading(false);
+              return;
+            }
+          } catch (resetError) {
+            // Ignore reset password errors for this check
+            console.log('Reset password check failed:', resetError);
+          }
+
+          // If we reach here, email exists but password is wrong
           setPasswordAttempts(prev => {
             const newAttempts = prev + 1;
             if (newAttempts >= 2) {
@@ -113,13 +106,19 @@ const Login = () => {
             }
             return newAttempts;
           });
+
+          toast({
+            title: "Login Failed",
+            description: "Password is wrong. Please try again.",
+            variant: "destructive",
+          });
+          setIsLoading(false);
+          return;
         }
 
-        // Specific error messages
+        // Handle other auth errors
         let errorMessage = error.message;
-        if (error.message.includes('Invalid login credentials')) {
-          errorMessage = 'Password is wrong. Please try again.';
-        } else if (error.message.includes('Email not confirmed')) {
+        if (error.message.includes('Email not confirmed')) {
           errorMessage = 'Please verify your email address before logging in.';
         }
 
