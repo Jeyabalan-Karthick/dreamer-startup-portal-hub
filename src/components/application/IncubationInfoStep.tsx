@@ -85,11 +85,44 @@ const IncubationInfoStep = ({ data, updateData, onNext, onPrev }: IncubationInfo
 
   if (loading) {
     return (
-      <Card className="border-gray-200">
-        <CardContent className="pt-6">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
-            <p className="mt-2 text-gray-600">Loading incubation centers...</p>
+      <Card className="border-gray-200 dark:border-gray-600 dark:bg-gray-800 shadow-lg dark:shadow-gray-700/20">
+        <CardHeader>
+          <Skeleton className="h-7 w-48" />
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            {/* Incubation Centre field skeleton */}
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-40" />
+              <Skeleton className="h-12 w-full" />
+            </div>
+
+            {/* File upload fields skeleton */}
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-36" />
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-3 w-48" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-40" />
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-3 w-52" />
+              </div>
+            </div>
+
+            {/* Website field skeleton */}
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-48" />
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-3 w-60" />
+            </div>
+
+            {/* Navigation buttons skeleton */}
+            <div className="flex justify-between">
+              <Skeleton className="h-10 w-20" />
+              <Skeleton className="h-10 w-24" />
+            </div>
           </div>
         </CardContent>
       </Card>

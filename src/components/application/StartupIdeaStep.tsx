@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -7,6 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import ApplicationSuccess from './ApplicationSuccess';
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface StartupIdeaStepProps {
   data: any;
@@ -15,9 +16,20 @@ interface StartupIdeaStepProps {
 }
 
 const StartupIdeaStep = ({ data, updateData, onPrev }: StartupIdeaStepProps) => {
+  const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [applicationId, setApplicationId] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    const initializeComponent = async () => {
+      // Simulate loading time for smoother UX
+      await new Promise(resolve => setTimeout(resolve, 600));
+      setLoading(false);
+    };
+
+    initializeComponent();
+  }, []);
 
   const expectationOptions = [
     'marketing stratergy',
@@ -163,6 +175,51 @@ const StartupIdeaStep = ({ data, updateData, onPrev }: StartupIdeaStepProps) => 
   // Show success component if submitted
   if (submitted && applicationId) {
     return <ApplicationSuccess applicationId={applicationId} />;
+  }
+
+  // Skeleton loading screen
+  if (loading) {
+    return (
+      <Card className="border-gray-200 dark:border-gray-600 dark:bg-gray-800 shadow-lg dark:shadow-gray-700/20">
+        <CardHeader>
+          <Skeleton className="h-7 w-64" />
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            {/* Idea description field skeleton */}
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-40" />
+              <Skeleton className="h-24 w-full" />
+            </div>
+
+            {/* Expectations checkboxes skeleton */}
+            <div className="space-y-3">
+              <Skeleton className="h-4 w-56" />
+              <div className="grid grid-cols-2 gap-3">
+                {[1, 2, 3, 4, 5, 6].map((item) => (
+                  <div key={item} className="flex items-center space-x-2">
+                    <Skeleton className="h-4 w-4" />
+                    <Skeleton className="h-4 w-24" />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Challenges field skeleton */}
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-48" />
+              <Skeleton className="h-20 w-full" />
+            </div>
+
+            {/* Navigation buttons skeleton */}
+            <div className="flex gap-4">
+              <Skeleton className="h-10 w-20" />
+              <Skeleton className="h-10 flex-1" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (

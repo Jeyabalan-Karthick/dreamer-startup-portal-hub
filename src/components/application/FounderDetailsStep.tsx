@@ -4,9 +4,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { CheckCircle2, XCircle } from 'lucide-react';
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface FounderDetailsData {
   founderName: string;
@@ -28,6 +29,7 @@ interface FounderDetailsStepProps {
 }
 
 const FounderDetailsStep = ({ data, updateData, onNext }: FounderDetailsStepProps) => {
+  const [loading, setLoading] = useState(true);
   const [showCompanyTypeOther, setShowCompanyTypeOther] = useState(data.companyType === 'Others');
   const [showSourceOther, setShowSourceOther] = useState(data.source === 'Other');
   const [companyTypeOther, setCompanyTypeOther] = useState(data.companyTypeOther || '');
@@ -35,6 +37,16 @@ const FounderDetailsStep = ({ data, updateData, onNext }: FounderDetailsStepProp
   const [couponStatus, setCouponStatus] = useState<'idle' | 'valid' | 'invalid' | 'checking'>('idle');
   const [couponMessage, setCouponMessage] = useState('');
   const [couponId, setCouponId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const initializeComponent = async () => {
+      // Simulate loading time for smoother UX
+      await new Promise(resolve => setTimeout(resolve, 600));
+      setLoading(false);
+    };
+
+    initializeComponent();
+  }, []);
 
   const handleInputChange = (field: string, value: string) => {
     updateData({ [field]: value });
@@ -131,6 +143,72 @@ const FounderDetailsStep = ({ data, updateData, onNext }: FounderDetailsStepProp
     handleInputChange('couponCode', e.target.value);
     validateCoupon(e.target.value);
   };
+
+  // Skeleton loading screen
+  if (loading) {
+    return (
+      <Card className="border-gray-200 dark:border-gray-600 dark:bg-gray-800 shadow-lg dark:shadow-gray-700/20">
+        <CardHeader>
+          <Skeleton className="h-7 w-64" />
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            {/* Name and Startup fields skeleton */}
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-12 w-full" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-12 w-full" />
+              </div>
+            </div>
+
+            {/* Email and Phone fields skeleton */}
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-12 w-full" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-12 w-full" />
+              </div>
+            </div>
+
+            {/* Company Type, Team Size, Source fields skeleton */}
+            <div className="grid md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-12 w-full" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-12 w-full" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-12 w-full" />
+              </div>
+            </div>
+
+            {/* Coupon Code field skeleton */}
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-4 w-48" />
+            </div>
+
+            {/* Submit button skeleton */}
+            <div className="flex justify-end">
+              <Skeleton className="h-10 w-24" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
