@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -5,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { validateEmail, checkPasswordStrength, validatePassword } from "@/lib/validation-utils";
@@ -15,12 +17,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 const Register = () => {
   const navigate = useNavigate();
+  const [step, setStep] = useState<'registration' | 'otp'>('registration');
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     confirmPassword: '',
     passwordHint: ''
   });
+  const [otp, setOtp] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
   const [rememberMe, setRememberMe] = useState(false);
@@ -43,7 +47,7 @@ const Register = () => {
     initializePage();
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleRegistrationSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Email validation
@@ -85,24 +89,6 @@ const Register = () => {
     console.log('Registration attempt:', { email: formData.email });
 
     try {
-      // First check if email is already registered
-      const { data: existingUser, error: checkError } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('email', formData.email)
-        .single();
-
-      if (existingUser) {
-        // Email is already registered
-        toast({
-          title: "Email Already Registered",
-          description: "This email address is already registered. Please enter a different email address.",
-          variant: "destructive",
-        });
-        setIsLoading(false);
-        return;
-      }
-
       const redirectUrl = "https://dreamer-startup-portal-hub.vercel.app/login";
 
       const { data, error } = await supabase.auth.signUp({
@@ -133,30 +119,87 @@ const Register = () => {
         return;
       }
 
-      // Store password hint and remember me preference
-      if (rememberMe) {
-        localStorage.setItem('rememberedEmail', formData.email);
-        localStorage.setItem('passwordHint', formData.passwordHint);
-      }
-
       console.log('Registration successful:', data);
 
       if (data.user && !data.user.email_confirmed_at) {
         toast({
           title: "Registration Successful",
-          description: "Please check your email and click the verification link to complete your registration.",
+          description: "Please check your email and enter the 6-digit verification code.",
         });
+        setStep('otp');
       } else {
         toast({
           title: "Registration Successful",
           description: "Welcome! You can now access the application.",
         });
+        
+        // Store password hint and remember me preference
+        if (rememberMe) {
+          localStorage.setItem('rememberedEmail', formData.email);
+          localStorage.setItem('passwordHint', formData.passwordHint);
+        }
+        
         navigate('/application');
       }
     } catch (error) {
       console.error('Registration error:', error);
       toast({
         title: "Registration Failed",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleOtpSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (otp.length !== 6) {
+      toast({
+        title: "Invalid OTP",
+        description: "Please enter a 6-digit OTP code.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const { error } = await supabase.auth.verifyOtp({
+        email: formData.email,
+        token: otp,
+        type: 'signup'
+      });
+
+      if (error) {
+        toast({
+          title: "Invalid OTP",
+          description: "The OTP code is incorrect or has expired.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Store password hint and remember me preference
+      if (rememberMe) {
+        localStorage.setItem('rememberedEmail', formData.email);
+        localStorage.setItem('passwordHint', formData.passwordHint);
+      }
+
+      toast({
+        title: "Email Verified",
+        description: "Your email has been verified successfully. Welcome!",
+      });
+
+      // Navigate to application page
+      navigate('/application');
+    } catch (error) {
+      console.error('OTP verification error:', error);
+      toast({
+        title: "Error",
         description: "An unexpected error occurred",
         variant: "destructive",
       });
@@ -368,191 +411,246 @@ const Register = () => {
         <div className="w-full max-w-md">
           <Card className="border-0 shadow-2xl bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm">
             <CardHeader className="text-center pb-8">
-              <CardTitle className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2 font-syne">Sign Up</CardTitle>
+              <CardTitle className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2 font-syne">
+                {step === 'registration' ? 'Sign Up' : 'Verify Email'}
+              </CardTitle>
+              {step === 'otp' && (
+                <CardDescription className="text-gray-600 dark:text-gray-400 font-syne">
+                  Enter the 6-digit code sent to your email
+                </CardDescription>
+              )}
             </CardHeader>
             <CardContent className="px-8 pb-8">
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="text-gray-800 dark:text-gray-200 font-medium font-syne">Email address*</Label>
-                  <div className="relative overflow-hidden rounded-md">
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      required
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      className={`h-12 border-gray-300 dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-300 bg-white dark:bg-gray-800 dark:text-gray-100 font-syne relative ${emailError ? 'border-red-500' : ''}`}
-                      placeholder="Enter your email "
-                    />
-                  </div>
-                  {emailError && (
-                    <p className="text-red-500 text-sm mt-1">{emailError}</p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <Label htmlFor="password" className="text-gray-800 dark:text-gray-200 font-medium font-syne">Password*</Label>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Info className="h-4 w-4 text-gray-500 dark:text-gray-400 cursor-help" />
-                          </TooltipTrigger>
-                          <TooltipContent side="right" className="max-w-xs">
-                            <div className="text-xs space-y-1">
-                              <p className="font-medium mb-2">Password must contain:</p>
-                              <div className="flex items-center space-x-2">
-                                <span className={formData.password && passwordStrength.requirements.length ? "text-green-500" : "text-gray-400"}>
-                                  {formData.password && passwordStrength.requirements.length ? "✓" : "•"}
-                                </span>
-                                <span>8+ characters</span>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <span className={formData.password && passwordStrength.requirements.uppercase ? "text-green-500" : "text-gray-400"}>
-                                  {formData.password && passwordStrength.requirements.uppercase ? "✓" : "•"}
-                                </span>
-                                <span>Uppercase letter</span>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <span className={formData.password && passwordStrength.requirements.lowercase ? "text-green-500" : "text-gray-400"}>
-                                  {formData.password && passwordStrength.requirements.lowercase ? "✓" : "•"}
-                                </span>
-                                <span>Lowercase letter</span>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <span className={formData.password && passwordStrength.requirements.number ? "text-green-500" : "text-gray-400"}>
-                                  {formData.password && passwordStrength.requirements.number ? "✓" : "•"}
-                                </span>
-                                <span>Number</span>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <span className={formData.password && passwordStrength.requirements.special ? "text-green-500" : "text-gray-400"}>
-                                  {formData.password && passwordStrength.requirements.special ? "✓" : "•"}
-                                </span>
-                                <span>Special character (!@#$%^&*)</span>
-                              </div>
-                            </div>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
+              {step === 'registration' ? (
+                <form onSubmit={handleRegistrationSubmit} className="space-y-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-gray-800 dark:text-gray-200 font-medium font-syne">Email address*</Label>
+                    <div className="relative overflow-hidden rounded-md">
+                      <Input
+                        id="email"
+                        name="email"
+                        type="email"
+                        required
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        className={`h-12 border-gray-300 dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-300 bg-white dark:bg-gray-800 dark:text-gray-100 font-syne relative ${emailError ? 'border-red-500' : ''}`}
+                        placeholder="Enter your email "
+                      />
                     </div>
-                    {formData.password && (
-                      <div className="flex items-center space-x-1">
-                        <div className="flex space-x-1">
-                          <div 
-                            className="w-2 h-2 rounded-full"
-                            style={{ backgroundColor: passwordStrength.score >= 1 ? passwordStrength.color : '#e5e7eb' }}
-                          />
-                          <div 
-                            className="w-2 h-2 rounded-full"
-                            style={{ backgroundColor: passwordStrength.score >= 2 ? passwordStrength.color : '#e5e7eb' }}
-                          />
-                          <div 
-                            className="w-2 h-2 rounded-full"
-                            style={{ backgroundColor: passwordStrength.score >= 3 ? passwordStrength.color : '#e5e7eb' }}
-                          />
-                        </div>
-                        <span className="text-xs font-medium ml-2" style={{ color: passwordStrength.color }}>
-                          {passwordStrength.label}
-                        </span>
-                      </div>
+                    {emailError && (
+                      <p className="text-red-500 text-sm mt-1">{emailError}</p>
                     )}
                   </div>
 
-                  <div className="relative overflow-hidden rounded-md">
-                    <Input
-                      id="password"
-                      name="password"
-                      type={showPassword ? "text" : "password"}
-                      required
-                      value={formData.password}
-                      onChange={handleInputChange}
-                      className="h-12 border-gray-300 dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-300 bg-white dark:bg-gray-800 dark:text-gray-100 font-syne relative pr-10"
-                      placeholder="Create a password"
-                    />
-                    <button
-                      type="button"
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <Label htmlFor="password" className="text-gray-800 dark:text-gray-200 font-medium font-syne">Password*</Label>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Info className="h-4 w-4 text-gray-500 dark:text-gray-400 cursor-help" />
+                            </TooltipTrigger>
+                            <TooltipContent side="right" className="max-w-xs">
+                              <div className="text-xs space-y-1">
+                                <p className="font-medium mb-2">Password must contain:</p>
+                                <div className="flex items-center space-x-2">
+                                  <span className={formData.password && passwordStrength.requirements.length ? "text-green-500" : "text-gray-400"}>
+                                    {formData.password && passwordStrength.requirements.length ? "✓" : "•"}
+                                  </span>
+                                  <span>8+ characters</span>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <span className={formData.password && passwordStrength.requirements.uppercase ? "text-green-500" : "text-gray-400"}>
+                                    {formData.password && passwordStrength.requirements.uppercase ? "✓" : "•"}
+                                  </span>
+                                  <span>Uppercase letter</span>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <span className={formData.password && passwordStrength.requirements.lowercase ? "text-green-500" : "text-gray-400"}>
+                                    {formData.password && passwordStrength.requirements.lowercase ? "✓" : "•"}
+                                  </span>
+                                  <span>Lowercase letter</span>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <span className={formData.password && passwordStrength.requirements.number ? "text-green-500" : "text-gray-400"}>
+                                    {formData.password && passwordStrength.requirements.number ? "✓" : "•"}
+                                  </span>
+                                  <span>Number</span>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <span className={formData.password && passwordStrength.requirements.special ? "text-green-500" : "text-gray-400"}>
+                                    {formData.password && passwordStrength.requirements.special ? "✓" : "•"}
+                                  </span>
+                                  <span>Special character (!@#$%^&*)</span>
+                                </div>
+                              </div>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                      {formData.password && (
+                        <div className="flex items-center space-x-1">
+                          <div className="flex space-x-1">
+                            <div 
+                              className="w-2 h-2 rounded-full"
+                              style={{ backgroundColor: passwordStrength.score >= 1 ? passwordStrength.color : '#e5e7eb' }}
+                            />
+                            <div 
+                              className="w-2 h-2 rounded-full"
+                              style={{ backgroundColor: passwordStrength.score >= 2 ? passwordStrength.color : '#e5e7eb' }}
+                            />
+                            <div 
+                              className="w-2 h-2 rounded-full"
+                              style={{ backgroundColor: passwordStrength.score >= 3 ? passwordStrength.color : '#e5e7eb' }}
+                            />
+                          </div>
+                          <span className="text-xs font-medium ml-2" style={{ color: passwordStrength.color }}>
+                            {passwordStrength.label}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="relative overflow-hidden rounded-md">
+                      <Input
+                        id="password"
+                        name="password"
+                        type={showPassword ? "text" : "password"}
+                        required
+                        value={formData.password}
+                        onChange={handleInputChange}
+                        className="h-12 border-gray-300 dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-300 bg-white dark:bg-gray-800 dark:text-gray-100 font-syne relative pr-10"
+                        placeholder="Create a password"
+                      />
+                      <button
+                        type="button"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
                   </div>
-                </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="confirmPassword" className="text-gray-800 dark:text-gray-200 font-medium font-syne">Confirm Password*</Label>
-                  <div className="relative overflow-hidden rounded-md">
-                    <Input
-                      id="confirmPassword"
-                      name="confirmPassword"
-                      type={showConfirmPassword ? "text" : "password"}
-                      required
-                      value={formData.confirmPassword}
-                      onChange={handleInputChange}
-                      className="h-12 border-gray-300 dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-300 bg-white dark:bg-gray-800 dark:text-gray-100 font-syne relative pr-10"
-                      placeholder="Confirm your password"
-                    />
-                    <button
-                      type="button"
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    >
-                      {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
+                  <div className="space-y-2">
+                    <Label htmlFor="confirmPassword" className="text-gray-800 dark:text-gray-200 font-medium font-syne">Confirm Password*</Label>
+                    <div className="relative overflow-hidden rounded-md">
+                      <Input
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        type={showConfirmPassword ? "text" : "password"}
+                        required
+                        value={formData.confirmPassword}
+                        onChange={handleInputChange}
+                        className="h-12 border-gray-300 dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-300 bg-white dark:bg-gray-800 dark:text-gray-100 font-syne relative pr-10"
+                        placeholder="Confirm your password"
+                      />
+                      <button
+                        type="button"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      >
+                        {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
                   </div>
-                </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="passwordHint" className="text-gray-800 dark:text-gray-200 font-medium font-syne">Password Hint*</Label>
-                  <div className="relative overflow-hidden rounded-md">
-                    <Input
-                      id="passwordHint"
-                      name="passwordHint"
-                      type="text"
-                      required
-                      value={formData.passwordHint}
-                      onChange={handleInputChange}
-                      className="h-12 border-gray-300 dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-300 bg-white dark:bg-gray-800 dark:text-gray-100 font-syne relative"
-                      placeholder="Enter a hint to remember your password"
-                    />
+                  <div className="space-y-2">
+                    <Label htmlFor="passwordHint" className="text-gray-800 dark:text-gray-200 font-medium font-syne">Password Hint*</Label>
+                    <div className="relative overflow-hidden rounded-md">
+                      <Input
+                        id="passwordHint"
+                        name="passwordHint"
+                        type="text"
+                        required
+                        value={formData.passwordHint}
+                        onChange={handleInputChange}
+                        className="h-12 border-gray-300 dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-300 bg-white dark:bg-gray-800 dark:text-gray-100 font-syne relative"
+                        placeholder="Enter a hint to remember your password"
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">This hint will help you remember your password during login</p>
                   </div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">This hint will help you remember your password during login</p>
-                </div>
 
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="rememberMe"
-                    checked={rememberMe}
-                    onCheckedChange={(checked) => setRememberMe(checked as boolean)}
-                  />
-                  <Label htmlFor="rememberMe" className="text-sm font-medium text-gray-700 dark:text-gray-300 font-syne">
-                    Remember me 
-                  </Label>
-                </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="rememberMe"
+                      checked={rememberMe}
+                      onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                    />
+                    <Label htmlFor="rememberMe" className="text-sm font-medium text-gray-700 dark:text-gray-300 font-syne">
+                      Remember me 
+                    </Label>
+                  </div>
 
-                <Button 
-                  type="submit" 
-                  className="w-full h-12 bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-100 text-white dark:text-gray-900 font-medium text-lg rounded-md mt-8 font-syne transition-colors duration-200 shadow-lg hover:shadow-xl"
-                  disabled={isLoading}
-                >
-                  {isLoading ? 'Creating Account...' : 'Sign up →'}
-                </Button>
-              </form>
-
-              <div className="mt-8 text-center">
-                <p className="text-gray-600 dark:text-gray-400 font-syne">
-                  Already have an account?{' '}
-                  <button
-                    onClick={() => navigate('/login')}
-                    className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline font-medium font-syne transition-colors duration-200"
+                  <Button 
+                    type="submit" 
+                    className="w-full h-12 bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-100 text-white dark:text-gray-900 font-medium text-lg rounded-md mt-8 font-syne transition-colors duration-200 shadow-lg hover:shadow-xl"
+                    disabled={isLoading}
                   >
-                    Log in
-                  </button>
-                </p>
-              </div>
+                    {isLoading ? 'Creating Account...' : 'Sign up →'}
+                  </Button>
+                </form>
+              ) : (
+                <form onSubmit={handleOtpSubmit} className="space-y-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="otp" className="text-gray-800 dark:text-gray-200 font-medium font-syne">Verification Code*</Label>
+                    <div className="flex justify-center">
+                      <InputOTP
+                        value={otp}
+                        onChange={setOtp}
+                        maxLength={6}
+                        className="font-syne"
+                      >
+                        <InputOTPGroup>
+                          <InputOTPSlot index={0} className="w-12 h-12 text-lg font-syne border-gray-300 dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-300 bg-white dark:bg-gray-800 dark:text-gray-100" />
+                          <InputOTPSlot index={1} className="w-12 h-12 text-lg font-syne border-gray-300 dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-300 bg-white dark:bg-gray-800 dark:text-gray-100" />
+                          <InputOTPSlot index={2} className="w-12 h-12 text-lg font-syne border-gray-300 dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-300 bg-white dark:bg-gray-800 dark:text-gray-100" />
+                          <InputOTPSlot index={3} className="w-12 h-12 text-lg font-syne border-gray-300 dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-300 bg-white dark:bg-gray-800 dark:text-gray-100" />
+                          <InputOTPSlot index={4} className="w-12 h-12 text-lg font-syne border-gray-300 dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-300 bg-white dark:bg-gray-800 dark:text-gray-100" />
+                          <InputOTPSlot index={5} className="w-12 h-12 text-lg font-syne border-gray-300 dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-300 bg-white dark:bg-gray-800 dark:text-gray-100" />
+                        </InputOTPGroup>
+                      </InputOTP>
+                    </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-300 text-center font-syne">
+                      Code sent to {formData.email}
+                    </p>
+                  </div>
+
+                  <Button 
+                    type="submit" 
+                    className="w-full h-12 bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-100 text-white dark:text-gray-900 font-medium text-lg rounded-md mt-8 font-syne transition-colors duration-200 shadow-lg hover:shadow-xl"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? 'Verifying...' : 'Verify Email →'}
+                  </Button>
+
+                  <div className="text-center">
+                    <button
+                      type="button"
+                      onClick={() => setStep('registration')}
+                      className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline font-medium font-syne transition-colors duration-200"
+                    >
+                      ← Back to Registration
+                    </button>
+                  </div>
+                </form>
+              )}
+
+              {step === 'registration' && (
+                <div className="mt-8 text-center">
+                  <p className="text-gray-600 dark:text-gray-400 font-syne">
+                    Already have an account?{' '}
+                    <button
+                      onClick={() => navigate('/login')}
+                      className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline font-medium font-syne transition-colors duration-200"
+                    >
+                      Log in
+                    </button>
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
