@@ -61,7 +61,7 @@ const ForgotPassword = () => {
 
       // Use resetPasswordForEmail to trigger password reset OTP
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`
+        redirectTo: 'https://dreamer-startup-portal-hub.vercel.app/reset-password'
       });
 
       if (error) {
