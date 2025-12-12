@@ -1,0 +1,55 @@
+================================================================================
+  URGENT: FIX RLS ERROR - STEP BY STEP INSTRUCTIONS
+================================================================================
+
+ERROR YOU'RE SEEING:
+"new row violates row-level security policy for table 'incubation_centres'"
+
+THIS IS A DATABASE PERMISSION ISSUE - YOU MUST RUN SQL IN SUPABASE DASHBOARD
+
+================================================================================
+STEP 1: OPEN SUPABASE DASHBOARD
+================================================================================
+1. Go to: https://supabase.com/dashboard
+2. Login if needed
+3. Click on your project: "nxsrxdlsnabpshncdplv"
+
+================================================================================
+STEP 2: OPEN SQL EDITOR
+================================================================================
+1. Look at the LEFT SIDEBAR
+2. Click on "SQL Editor" (it has a database icon)
+3. Click the "New query" button (top right)
+
+================================================================================
+STEP 3: COPY THE SQL
+================================================================================
+1. Open the file "FIX_RLS_NOW.sql" in this project folder
+2. Select ALL the text (Ctrl+A)
+3. Copy it (Ctrl+C)
+
+================================================================================
+STEP 4: PASTE AND RUN
+================================================================================
+1. Go back to Supabase SQL Editor
+2. Paste the SQL (Ctrl+V) into the editor
+3. Click the "RUN" button (or press Ctrl+Enter)
+4. Wait for "Success. No rows returned" message
+
+================================================================================
+STEP 5: TEST
+================================================================================
+1. Go back to your admin page
+2. Try adding an incubation centre
+3. It should work now!
+
+================================================================================
+IF YOU STILL GET ERRORS:
+================================================================================
+- Make sure you copied ALL the SQL (from line 1 to the end)
+- Check that you see "Success" message in Supabase
+- Refresh your browser page
+- Clear browser cache (Ctrl+Shift+Delete)
+
+================================================================================
+

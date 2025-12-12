@@ -1,5 +1,7 @@
--- Comprehensive fix for incubation_centres RLS policies
--- Drop all existing policies to avoid conflicts
+-- QUICK FIX: Run this SQL in your Supabase Dashboard > SQL Editor
+-- This will fix the RLS policy issue for incubation_centres table
+
+-- Step 1: Drop all existing policies
 DROP POLICY IF EXISTS "Anyone can view incubation centres" ON public.incubation_centres;
 DROP POLICY IF EXISTS "Anyone can insert incubation centres" ON public.incubation_centres;
 DROP POLICY IF EXISTS "Anyone can update incubation centres" ON public.incubation_centres;
@@ -13,33 +15,29 @@ DROP POLICY IF EXISTS "public_insert_incubation_centres" ON public.incubation_ce
 DROP POLICY IF EXISTS "public_update_incubation_centres" ON public.incubation_centres;
 DROP POLICY IF EXISTS "public_delete_incubation_centres" ON public.incubation_centres;
 
--- Ensure RLS is enabled
+-- Step 2: Ensure RLS is enabled
 ALTER TABLE public.incubation_centres ENABLE ROW LEVEL SECURITY;
 
--- Create policies that explicitly allow anon and authenticated roles
--- This is needed for the admin panel to work
-CREATE POLICY "anon_select_incubation_centres" 
+-- Step 3: Create new policies that allow all operations (matching the applications table pattern)
+-- Note: Not specifying TO clause means it applies to all roles including anon
+CREATE POLICY "Allow anyone to view incubation centres" 
 ON public.incubation_centres 
 FOR SELECT 
-TO anon, authenticated
 USING (true);
 
-CREATE POLICY "anon_insert_incubation_centres" 
+CREATE POLICY "Allow anyone to insert incubation centres" 
 ON public.incubation_centres 
 FOR INSERT 
-TO anon, authenticated
 WITH CHECK (true);
 
-CREATE POLICY "anon_update_incubation_centres" 
+CREATE POLICY "Allow anyone to update incubation centres" 
 ON public.incubation_centres 
 FOR UPDATE 
-TO anon, authenticated
 USING (true)
 WITH CHECK (true);
 
-CREATE POLICY "anon_delete_incubation_centres" 
+CREATE POLICY "Allow anyone to delete incubation centres" 
 ON public.incubation_centres 
 FOR DELETE 
-TO anon, authenticated
 USING (true);
 
