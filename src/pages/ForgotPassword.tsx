@@ -38,38 +38,29 @@ const ForgotPassword = () => {
     setIsLoading(true);
 
     try {
-      // First check if email is registered
-      const { data: userData, error: userError } = await supabase
-        .from('profiles')
-        .select('id, email')
-        .eq('email', email)
-        .single();
-
-      if (userError || !userData) {
-        // Email not found in profiles - don't send OTP
-        toast({
-          title: "Email Not Registered",
-          description: "This email address is not registered. Please enter a registered email address or sign up first.",
-          variant: "destructive",
-        });
-        setIsLoading(false);
-        return;
-      }
-
-      // Only proceed if email exists in profiles
-      console.log('Email found in profiles:', userData.email);
-
       // Use resetPasswordForEmail to trigger password reset OTP
+      // This will automatically check if the email exists in Supabase Auth
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: 'https://dreamer-startup-portal-hub.vercel.app/reset-password'
       });
 
       if (error) {
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive",
-        });
+        // Check if the error is due to email not being registered
+        if (error.message.includes('User not found') || 
+            error.message.includes('Unable to validate email address') ||
+            error.message.includes('Invalid email')) {
+          toast({
+            title: "Email Not Registered",
+            description: "This email address is not registered. Please enter a registered email address or sign up first.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Error",
+            description: error.message,
+            variant: "destructive",
+          });
+        }
         setIsLoading(false);
         return;
       }

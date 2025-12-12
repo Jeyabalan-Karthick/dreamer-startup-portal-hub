@@ -175,16 +175,39 @@ const Admin = () => {
       return;
     }
 
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(newCentre.admin_email)) {
+      toast({
+        title: "Error",
+        description: "Please enter a valid email address",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       const { error } = await supabase
         .from('incubation_centres')
-        .insert([newCentre]);
+        .insert([{
+          name: newCentre.name.trim(),
+          admin_email: newCentre.admin_email.trim().toLowerCase()
+        }]);
 
       if (error) {
         console.error('Error adding incubation centre:', error);
+        
+        // Provide more specific error messages
+        let errorMessage = "Failed to add incubation centre";
+        if (error.code === '23505') {
+          errorMessage = "An incubation centre with this name already exists";
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+        
         toast({
           title: "Error",
-          description: "Failed to add incubation centre",
+          description: errorMessage,
           variant: "destructive",
         });
         return;
@@ -199,6 +222,11 @@ const Admin = () => {
       fetchIncubationCentres();
     } catch (error) {
       console.error('Error:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "An unexpected error occurred",
+        variant: "destructive",
+      });
     }
   };
 
@@ -410,7 +438,7 @@ const Admin = () => {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4 max-w-7xl">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Dashboard</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Dashboards</h1>
           <p className="text-gray-600">View startup applications and manage incubation centers</p>
         </div>
 

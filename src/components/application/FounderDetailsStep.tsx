@@ -315,7 +315,7 @@ const FounderDetailsStep = ({ data, updateData, onNext }: FounderDetailsStepProp
                 type="email"
                 value={data.email || ''}
                 readOnly
-                className="border-gray-300 bg-gray-100 cursor-not-allowed dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-300 bg-white dark:bg-gray-700 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                className="border-gray-300 bg-white cursor-not-allowed dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-300 dark:bg-gray-700 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                 placeholder="Enter your email"
                 required
               />

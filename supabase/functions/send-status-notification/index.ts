@@ -1,6 +1,10 @@
-// @ts-nocheck
+// @ts-ignore Deno types
+/// <reference lib="deno.ns" />
+// @ts-ignore Deno HTTP import
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+// @ts-ignore Deno ESM import
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+// @ts-ignore Deno npm import
 import { Resend } from "npm:resend@2.0.0";
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
